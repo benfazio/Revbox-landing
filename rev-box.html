@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RevBox - Automate Your Insurance Agency</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        /* Header with Logo */
+        .header {
+            background: #fff;
+            padding: 25px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 3em;
+            color: #2563eb;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            color: white;
+            padding: 80px 20px;
+            text-align: center;
+        }
+        
+        .hero h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .hero p {
+            font-size: 1.4em;
+            margin-bottom: 40px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            opacity: 0.95;
+        }
+        
+        /* Stats Section */
+        .stats {
+            background: white;
+            padding: 60px 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            max-width: 1200px;
+            margin: -40px auto 0;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            position: relative;
+            z-index: 10;
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .stat-card h2 {
+            font-size: 3em;
+            color: #2563eb;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card p {
+            font-size: 1.2em;
+            color: #666;
+        }
+        
+        /* Packages Section */
+        .packages {
+            padding: 80px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .packages h2 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 60px;
+            color: #1e40af;
+        }
+        
+        .packages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+        }
+        
+        .package-card {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .package-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+        
+        .package-card.featured {
+            border: 3px solid #2563eb;
+            position: relative;
+        }
+        
+        .package-card.featured::before {
+            content: "MOST POPULAR";
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2563eb;
+            color: white;
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        
+        .package-card h3 {
+            font-size: 2em;
+            color: #2563eb;
+            margin-bottom: 15px;
+        }
+        
+        .package-card .subtitle {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 25px;
+            font-style: italic;
+        }
+        
+        .package-card ul {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+        
+        .package-card ul li {
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 1.05em;
+            position: relative;
+            padding-left: 30px;
+        }
+        
+        .package-card ul li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #2563eb;
+            font-weight: bold;
+            font-size: 1.3em;
+        }
+        
+        .cta-button {
+            display: block;
+            background: #2563eb;
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .cta-button:hover {
+            background: #1e40af;
+            transform: scale(1.05);
+        }
+        
+        /* Features Section */
+        .features {
+            background: #f1f5f9;
+            padding: 80px 20px;
+        }
+        
+        .features-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .features h2 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 60px;
+            color: #1e40af;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+        }
+        
+        .feature-card h3 {
+            color: #2563eb;
+            margin-bottom: 15px;
+            font-size: 1.6em;
+        }
+        
+        .feature-card p {
+            color: #666;
+            font-size: 1.1em;
+            line-height: 1.7;
+        }
+        
+        /* Integration Section */
+        .integrations {
+            padding: 80px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .integrations h2 {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            color: #1e40af;
+        }
+        
+        .integrations p {
+            font-size: 1.3em;
+            color: #666;
+            margin-bottom: 40px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .integration-tags {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+        
+        .integration-tag {
+            background: #2563eb;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+        
+        /* QR Code Section */
+        .qr-section {
+            background: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+        
+        .qr-section h2 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #1e40af;
+        }
+        
+        .qr-section p {
+            font-size: 1.3em;
+            color: #666;
+            margin-bottom: 40px;
+        }
+        
+        .qr-code-container {
+            display: inline-block;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+        
+        .qr-code-container img {
+            max-width: 300px;
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .qr-code-container p {
+            margin-top: 20px;
+            font-size: 1.1em;
+            color: #2563eb;
+            font-weight: bold;
+        }
+        
+        /* Final CTA */
+        .final-cta {
+            background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+            color: white;
+            padding: 80px 20px;
+            text-align: center;
+        }
+        
+        .final-cta h2 {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+        }
+        
+        .final-cta p {
+            font-size: 1.3em;
+            margin-bottom: 40px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .final-cta .cta-button {
+            display: inline-block;
+            background: white;
+            color: #2563eb;
+            font-size: 1.3em;
+            padding: 18px 45px;
+        }
+        
+        .final-cta .cta-button:hover {
+            background: #f1f5f9;
+            color: #1e40af;
+        }
+        
+        /* Footer */
+        .footer {
+            background: #1e293b;
+            color: white;
+            padding: 40px 20px;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .footer-contact {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .footer-contact a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.1em;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-contact a:hover {
+            color: #60a5fa;
+        }
+        
+        .schedule-button {
+            background: #2563eb;
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .schedule-button:hover {
+            background: #1e40af;
+            transform: scale(1.05);
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .hero h1 {
+                font-size: 2em;
+            }
+            
+            .hero p {
+                font-size: 1.1em;
+            }
+            
+            .packages-grid,
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .footer-contact {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .qr-code-container img {
+                max-width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <h1>Rev-Box</h1>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Automate Your Insurance Agency</h1>
+        <p>Stop losing clients and wasting time on manual tasks. RevBox builds custom automation systems that double your sales and save you hours every week.</p>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="stat-card">
+            <h2>2x</h2>
+            <p>Double Your Sales</p>
+        </div>
+        <div class="stat-card">
+            <h2>66%</h2>
+            <p>Time Saved Weekly</p>
+        </div>
+        <div class="stat-card">
+            <h2>2x</h2>
+            <p>Double Retention Rate</p>
+        </div>
+    </section>
+
+    <!-- Packages Section -->
+    <section class="packages">
+        <h2>Choose Your Automation Package</h2>
+        <div class="packages-grid">
+            <!-- M1A Package -->
+            <div class="package-card">
+                <h3>M1A</h3>
+                <p class="subtitle">My Automated Agency - First Steps</p>
+                <ul>
+                    <li>6 pre-built sales pipelines</li>
+                    <li>2 onboarding pipelines</li>
+                    <li>2 retained client pipelines</li>
+                    <li>4+ service workflow pipelines</li>
+                    <li>Lead nurture automation</li>
+                    <li>Cross-selling & upsell automation</li>
+                    <li>Training on Agency Zoom</li>
+                    <li>New leads contacted within 5 minutes</li>
+                </ul>
+                <a href="https://app.iclosed.io/e/rev-box/demo-call-rev-box" class="cta-button">Get Started</a>
+            </div>
+
+            <!-- M2A Package -->
+            <div class="package-card featured">
+                <h3>M2A</h3>
+                <p class="subtitle">My Automated Agency</p>
+                <ul>
+                    <li>Everything in M1A, plus:</li>
+                    <li>Custom workflows built for your agency</li>
+                    <li>Win-back campaigns for clients that previously left</li>
+                    <li>Full integration with all your tools</li>
+                    <li>Full training on all software</li>
+                    <li>Automated data cleanups for ease of use</li>
+                    <li>Custom solutions tailored to your needs</li>
+                    <li>Priority support</li>
+                </ul>
+                <a href="https://app.iclosed.io/e/rev-box/demo-call-rev-box" class="cta-button">Get Started</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="features-container">
+            <h2>How RevBox Transforms Your Agency</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3>Automated Follow-Ups</h3>
+                    <p>Never miss a follow-up again. Our system automatically nurtures leads and keeps clients engaged with personalized communications at the perfect time.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>Win-Back Campaigns</h3>
+                    <p>Recover clients that previously left with automated campaigns that identify opportunities and trigger personalized outreach to bring them back.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>Smart Data Management</h3>
+                    <p>Automated data cleanups keep your CRM organized and accurate, so you always have reliable information when you need it.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>Seamless Onboarding</h3>
+                    <p>Pre-built onboarding workflows ensure every new client has a smooth, professional experience from day one.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>Retention Automation</h3>
+                    <p>Keep clients longer with automated retention pipelines that proactively address concerns and maintain strong relationships.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>Revenue Growth</h3>
+                    <p>Intelligent cross-selling and upsell automation identifies opportunities and triggers personalized communications to increase client value.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Integration Section -->
+    <section class="integrations">
+        <h2>Connect All Your Tools</h2>
+        <p>RevBox integrates seamlessly with your existing systems so data flows automatically everywhere.</p>
+        <div class="integration-tags">
+            <span class="integration-tag">CRM</span>
+            <span class="integration-tag">AMS</span>
+            <span class="integration-tag">Agency Zoom</span>
+            <span class="integration-tag">Intake Forms</span>
+            <span class="integration-tag">Email Marketing</span>
+            <span class="integration-tag">Phone Systems</span>
+            <span class="integration-tag">Calendars</span>
+            <span class="integration-tag">Payment Processors</span>
+        </div>
+    </section>
+
+    <!-- QR Code Section -->
+    <section class="qr-section">
+        <h2>Scan to Schedule Your Demo</h2>
+        <p>Use your phone camera to scan the QR code and book your call instantly</p>
+        <div class="qr-code-container">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://app.iclosed.io/e/rev-box/demo-call-rev-box" alt="QR Code - Schedule Demo Call">
+            <p>Schedule Your Demo Call</p>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="final-cta">
+        <h2>Ready to Transform Your Agency?</h2>
+        <p>Join insurance agencies that are already saving time, increasing sales, and keeping more clients with RevBox automation.</p>
+        <a href="https://app.iclosed.io/e/rev-box/demo-call-rev-box" class="cta-button">Schedule Your Demo</a>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer" id="contact">
+        <div class="footer-content">
+            <div class="footer-contact">
+                <a href="mailto:ben@rev-box.com">📧 ben@rev-box.com</a>
+                <a href="tel:+4407248624">📞 +44 07248624</a>
+            </div>
+            <a href="https://app.iclosed.io/e/rev-box/demo-call-rev-box" class="schedule-button">Schedule a Call</a>
+        </div>
+    </footer>
+</body>
+</html>
