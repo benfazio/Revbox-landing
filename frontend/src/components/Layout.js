@@ -3,24 +3,22 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { 
   LayoutDashboard, 
-  Building2, 
-  Users, 
-  Upload, 
-  ClipboardCheck,
+  Database,
+  Inbox,
   AlertTriangle,
-  DollarSign,
+  CheckCircle,
+  Link2,
   LogOut,
-  FileSpreadsheet
+  Box
 } from 'lucide-react';
 
 const navItems = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/carriers', label: 'Carriers', icon: Building2 },
-  { path: '/agents', label: 'Agents', icon: Users },
-  { path: '/upload', label: 'Upload Center', icon: Upload },
-  { path: '/review', label: 'Data Review', icon: ClipboardCheck },
-  { path: '/conflicts', label: 'Conflicts', icon: AlertTriangle },
-  { path: '/payouts', label: 'Payouts', icon: DollarSign },
+  { path: '/sources', label: 'Data Sources', icon: Database },
+  { path: '/staging', label: 'Staging Area', icon: Inbox },
+  { path: '/conflicts', label: 'Conflict Resolution', icon: AlertTriangle },
+  { path: '/approved', label: 'Approved Data', icon: CheckCircle },
+  { path: '/linking', label: 'Table Linking', icon: Link2 },
 ];
 
 export const Layout = ({ children }) => {
@@ -33,22 +31,25 @@ export const Layout = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-100">
       {/* Sidebar */}
       <aside className="sidebar">
-        <div className="p-6 border-b border-slate-800">
+        <div className="p-5 border-b border-slate-800">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-md flex items-center justify-center">
-              <FileSpreadsheet className="w-6 h-6 text-white" />
+            <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center">
+              <Box className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="font-heading font-bold text-lg tracking-tight">PayoutHub</h1>
-              <p className="text-xs text-slate-400">Insurance Aggregator</p>
+              <h1 className="font-heading font-bold text-base tracking-tight">Rev-Box</h1>
+              <p className="text-xs text-slate-500">Data Management</p>
             </div>
           </div>
         </div>
 
         <nav className="py-4">
+          <div className="px-4 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            Navigation
+          </div>
           {navItems.map((item) => (
             <NavLink
               key={item.path}
@@ -58,28 +59,27 @@ export const Layout = ({ children }) => {
                 `nav-item ${isActive ? 'active' : ''}`
               }
             >
-              <item.icon className="nav-item-icon" />
-              <span className="text-sm font-medium">{item.label}</span>
+              <item.icon className="w-5 h-5" />
+              <span>{item.label}</span>
             </NavLink>
           ))}
         </nav>
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-800">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-slate-700 rounded-full flex items-center justify-center">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-8 h-8 bg-slate-700 rounded-full flex items-center justify-center flex-shrink-0">
                 <span className="text-sm font-medium text-white">
                   {user?.name?.charAt(0).toUpperCase()}
                 </span>
               </div>
-              <div className="flex-1 min-w-0">
+              <div className="min-w-0">
                 <p className="text-sm font-medium text-white truncate">{user?.name}</p>
-                <p className="text-xs text-slate-400 truncate">{user?.email}</p>
               </div>
             </div>
             <button
               onClick={handleLogout}
-              className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-colors"
+              className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
               data-testid="logout-btn"
             >
               <LogOut className="w-4 h-4" />

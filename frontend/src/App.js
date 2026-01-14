@@ -6,20 +6,19 @@ import { AuthProvider, useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
 import LoginPage from "@/pages/LoginPage";
 import DashboardPage from "@/pages/DashboardPage";
-import CarriersPage from "@/pages/CarriersPage";
-import CarrierDetailPage from "@/pages/CarrierDetailPage";
-import AgentsPage from "@/pages/AgentsPage";
-import UploadPage from "@/pages/UploadPage";
-import DataReviewPage from "@/pages/DataReviewPage";
-import ConflictsPage from "@/pages/ConflictsPage";
-import PayoutsPage from "@/pages/PayoutsPage";
+import DataSourcesPage from "@/pages/DataSourcesPage";
+import DataSourceDetailPage from "@/pages/DataSourceDetailPage";
+import StagingPage from "@/pages/StagingPage";
+import ConflictResolutionPage from "@/pages/ConflictResolutionPage";
+import ApprovedDataPage from "@/pages/ApprovedDataPage";
+import TableLinkingPage from "@/pages/TableLinkingPage";
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
   
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-slate-100">
         <div className="spinner" />
       </div>
     );
@@ -37,7 +36,7 @@ function AppRoutes() {
   
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-slate-100">
         <div className="spinner" />
       </div>
     );
@@ -58,42 +57,26 @@ function AppRoutes() {
         } 
       />
       <Route 
-        path="/carriers" 
+        path="/sources" 
         element={
           <ProtectedRoute>
-            <CarriersPage />
+            <DataSourcesPage />
           </ProtectedRoute>
         } 
       />
       <Route 
-        path="/carriers/:id" 
+        path="/sources/:id" 
         element={
           <ProtectedRoute>
-            <CarrierDetailPage />
+            <DataSourceDetailPage />
           </ProtectedRoute>
         } 
       />
       <Route 
-        path="/agents" 
+        path="/staging" 
         element={
           <ProtectedRoute>
-            <AgentsPage />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/upload" 
-        element={
-          <ProtectedRoute>
-            <UploadPage />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/review" 
-        element={
-          <ProtectedRoute>
-            <DataReviewPage />
+            <StagingPage />
           </ProtectedRoute>
         } 
       />
@@ -101,15 +84,23 @@ function AppRoutes() {
         path="/conflicts" 
         element={
           <ProtectedRoute>
-            <ConflictsPage />
+            <ConflictResolutionPage />
           </ProtectedRoute>
         } 
       />
       <Route 
-        path="/payouts" 
+        path="/approved" 
         element={
           <ProtectedRoute>
-            <PayoutsPage />
+            <ApprovedDataPage />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/linking" 
+        element={
+          <ProtectedRoute>
+            <TableLinkingPage />
           </ProtectedRoute>
         } 
       />

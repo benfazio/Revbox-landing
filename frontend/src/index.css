@@ -1,13 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --font-heading: 'Manrope', sans-serif;
-  --font-body: 'Inter', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-heading: 'IBM Plex Sans', sans-serif;
+  --font-body: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
 }
 
 body {
@@ -27,29 +27,30 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    --background: 220 20% 97%;
+    --foreground: 220 20% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 220 20% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 222 47% 11%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 217 91% 60%;
+    --popover-foreground: 220 20% 10%;
+    --primary: 220 70% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 15% 92%;
+    --secondary-foreground: 220 20% 20%;
+    --muted: 220 15% 95%;
+    --muted-foreground: 220 10% 45%;
+    --accent: 160 60% 45%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 217 91% 60%;
-    --radius: 0.375rem;
-    --success: 160 84% 39%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 15% 88%;
+    --input: 220 15% 88%;
+    --ring: 220 70% 50%;
+    --radius: 0.5rem;
+    --success: 160 60% 45%;
     --warning: 38 92% 50%;
-    --info: 217 91% 60%;
+    --conflict: 0 72% 51%;
+    --staging: 220 70% 50%;
   }
 }
 
@@ -81,50 +82,120 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   background: hsl(var(--muted-foreground) / 0.5);
 }
 
-/* Data table styling */
-.data-table {
-  font-family: var(--font-mono);
-  font-size: 0.875rem;
-}
-
-/* Animation classes */
+/* Animations */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.3s ease-out forwards;
+  animation: fadeIn 0.2s ease-out forwards;
 }
 
-@keyframes slideIn {
-  from { opacity: 0; transform: translateX(-16px); }
-  to { opacity: 1; transform: translateX(0); }
+@keyframes pulse-conflict {
+  0%, 100% { background-color: rgba(239, 68, 68, 0.1); }
+  50% { background-color: rgba(239, 68, 68, 0.2); }
 }
 
-.animate-slide-in {
-  animation: slideIn 0.3s ease-out forwards;
+.pulse-conflict {
+  animation: pulse-conflict 2s ease-in-out infinite;
 }
 
-/* Status badges */
-.status-pending { @apply bg-amber-100 text-amber-800 border-amber-200; }
-.status-completed { @apply bg-emerald-100 text-emerald-800 border-emerald-200; }
-.status-conflict { @apply bg-red-100 text-red-800 border-red-200; }
-.status-validated { @apply bg-blue-100 text-blue-800 border-blue-200; }
-.status-processing { @apply bg-slate-100 text-slate-800 border-slate-200; }
-.status-error { @apply bg-red-100 text-red-800 border-red-200; }
+/* Status indicators */
+.status-staging { @apply bg-blue-100 text-blue-700 border-blue-200; }
+.status-conflict { @apply bg-red-100 text-red-700 border-red-200; }
+.status-approved { @apply bg-emerald-100 text-emerald-700 border-emerald-200; }
+.status-rejected { @apply bg-slate-100 text-slate-600 border-slate-200; }
 
-/* Card hover effect */
-.card-hover {
-  @apply transition-transform duration-200;
+/* Conflict highlighting */
+.field-conflict {
+  @apply bg-red-50 border-l-4 border-red-500 px-2 py-1;
 }
 
-.card-hover:hover {
-  @apply -translate-y-1 shadow-lg;
+.field-match {
+  @apply bg-emerald-50 border-l-4 border-emerald-500 px-2 py-1;
 }
 
-@layer base {
-  [data-debug-wrapper="true"] {
-    display: contents !important;
-  }
+.field-new {
+  @apply bg-blue-50 border-l-4 border-blue-500 px-2 py-1;
+}
+
+/* Data table improvements */
+.data-grid {
+  @apply font-mono text-sm;
+}
+
+.data-grid th {
+  @apply bg-slate-100 text-slate-600 text-xs font-semibold uppercase tracking-wider px-3 py-2 text-left border-b-2 border-slate-200;
+}
+
+.data-grid td {
+  @apply px-3 py-2 border-b border-slate-100 text-slate-700;
+}
+
+.data-grid tr:hover td {
+  @apply bg-blue-50/50;
+}
+
+/* Comparison view */
+.comparison-panel {
+  @apply bg-white border border-slate-200 rounded-lg overflow-hidden;
+}
+
+.comparison-header {
+  @apply px-4 py-3 bg-slate-50 border-b border-slate-200 font-semibold text-sm;
+}
+
+.comparison-row {
+  @apply grid grid-cols-2 gap-px bg-slate-200;
+}
+
+.comparison-cell {
+  @apply bg-white p-3;
+}
+
+/* Field mapping */
+.mapping-connector {
+  @apply border-t-2 border-dashed border-slate-300;
+}
+
+/* Sidebar */
+.sidebar {
+  @apply fixed left-0 top-0 h-full w-60 bg-slate-900 text-white z-50;
+}
+
+.main-content {
+  @apply ml-60 min-h-screen;
+}
+
+.nav-item {
+  @apply flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-white cursor-pointer text-sm;
+  transition: all 0.15s;
+}
+
+.nav-item.active {
+  @apply bg-blue-600 text-white;
+}
+
+/* Loading */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinner {
+  @apply w-5 h-5 border-2 border-slate-200 border-t-blue-600 rounded-full;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Buttons */
+.btn-primary {
+  @apply bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 text-sm font-medium rounded-lg transition-colors;
+}
+
+.btn-danger {
+  @apply bg-red-600 text-white hover:bg-red-700 px-4 py-2 text-sm font-medium rounded-lg transition-colors;
+}
+
+.btn-ghost {
+  @apply text-slate-600 hover:bg-slate-100 px-4 py-2 text-sm font-medium rounded-lg transition-colors;
 }

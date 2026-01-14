@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { FileSpreadsheet, ArrowRight } from 'lucide-react';
+import { Box, ArrowRight } from 'lucide-react';
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -35,35 +35,35 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Panel - Login Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
-        <div className="w-full max-w-md space-y-8 animate-fade-in">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-slate-900 rounded-md flex items-center justify-center">
-              <FileSpreadsheet className="w-7 h-7 text-white" />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4">
+      <div className="w-full max-w-md">
+        <div className="bg-white rounded-2xl shadow-2xl p-8 animate-fade-in">
+          {/* Logo */}
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
+              <Box className="w-7 h-7 text-white" />
             </div>
             <div>
-              <h1 className="font-heading font-bold text-2xl tracking-tight text-slate-900">PayoutHub</h1>
-              <p className="text-sm text-slate-500">Insurance Payout Management</p>
+              <h1 className="font-heading font-bold text-2xl tracking-tight text-slate-900">Rev-Box</h1>
+              <p className="text-sm text-slate-500">Data Management Platform</p>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <h2 className="font-heading font-bold text-3xl tracking-tight text-slate-900">
-              {isLogin ? 'Welcome back' : 'Create account'}
+          <div className="mb-6">
+            <h2 className="font-heading font-semibold text-xl text-slate-900">
+              {isLogin ? 'Sign in' : 'Create account'}
             </h2>
-            <p className="text-slate-500">
+            <p className="text-sm text-slate-500 mt-1">
               {isLogin 
-                ? 'Enter your credentials to access your dashboard' 
-                : 'Get started with your payout management system'}
+                ? 'Enter your credentials to continue' 
+                : 'Get started with Rev-Box'}
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm font-medium text-slate-700">Full Name</Label>
+                <Label htmlFor="name">Full Name</Label>
                 <Input
                   id="name"
                   type="text"
@@ -71,14 +71,13 @@ export default function LoginPage() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required={!isLogin}
-                  className="h-11 border-slate-300 focus:border-blue-500 focus:ring-blue-500"
                   data-testid="register-name-input"
                 />
               </div>
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-slate-700">Email</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -86,13 +85,12 @@ export default function LoginPage() {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
-                className="h-11 border-slate-300 focus:border-blue-500 focus:ring-blue-500"
                 data-testid="login-email-input"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium text-slate-700">Password</Label>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -100,7 +98,6 @@ export default function LoginPage() {
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
-                className="h-11 border-slate-300 focus:border-blue-500 focus:ring-blue-500"
                 data-testid="login-password-input"
               />
             </div>
@@ -108,7 +105,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white font-medium"
+              className="w-full h-11 btn-primary"
               data-testid="login-submit-btn"
             >
               {loading ? (
@@ -122,7 +119,7 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="text-center">
+          <div className="mt-6 text-center">
             <button
               type="button"
               onClick={() => setIsLogin(!isLogin)}
@@ -131,24 +128,6 @@ export default function LoginPage() {
             >
               {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
             </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Right Panel - Background Image */}
-      <div 
-        className="hidden lg:block lg:w-1/2 bg-cover bg-center"
-        style={{
-          backgroundImage: 'url(https://images.unsplash.com/photo-1765046255517-412341954c4c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NjZ8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGdlb21ldHJpYyUyMGRhdGElMjBmbG93JTIwbWluaW1hbGlzdHxlbnwwfHx8fDE3Njg0MTQ3NzN8MA&ixlib=rb-4.1.0&q=85)'
-        }}
-      >
-        <div className="h-full w-full bg-slate-900/40 flex items-end p-12">
-          <div className="text-white max-w-lg">
-            <h3 className="font-heading font-bold text-2xl mb-3">Streamline Your Payout Process</h3>
-            <p className="text-slate-200 text-sm leading-relaxed">
-              Process carrier reports, map custom fields, detect conflicts automatically, 
-              and manage agent payouts all in one powerful platform.
-            </p>
           </div>
         </div>
       </div>
