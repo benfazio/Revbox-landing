@@ -845,6 +845,129 @@ async def get_conflicts(
     conflicts = await db.conflicts.find(query, {"_id": 0}).sort("created_at", -1).to_list(1000)
     return [ConflictResponse(**c) for c in conflicts]
 
+@api_router.get("/conflicts/{conflict_id}/details")
+async def get_conflict_details(conflict_id: str, current_user: dict = Depends(get_current_user)):
+    """Get detailed conflict info including source upload information"""
+    conflict = await db.conflicts.find_one({"id": conflict_id}, {"_id": 0})
+    if not conflict:
+        raise HTTPException(status_code=404, detail="Conflict not found")
+    
+    # Get the new record (from current upload)
+    new_record = await db.extracted_records.find_one({"id": conflict["record_id"]}, {"_id": 0})
+    new_upload = None
+    if new_record:
+        new_upload = await db.uploads.find_one({"id": new_record.get("upload_id")}, {"_id": 0})
+    
+    # Get the existing record that caused the conflict
+    existing_record = None
+    existing_upload = None
+    if conflict.get("existing_record_id"):
+        existing_record = await db.extracted_records.find_one({"id": conflict["existing_record_id"]}, {"_id": 0})
+        if existing_record:
+            existing_upload = await db.uploads.find_one({"id": existing_record.get("upload_id")}, {"_id": 0})
+    
+    return {
+        "conflict": conflict,
+        "new_record": new_record,
+        "new_upload": {
+            "filename": new_upload.get("filename") if new_upload else None,
+            "carrier_name": new_upload.get("carrier_name") if new_upload else None,
+            "created_at": new_upload.get("created_at") if new_upload else None
+        } if new_upload else None,
+        "existing_record": existing_record,
+        "existing_upload": {
+            "filename": existing_upload.get("filename") if existing_upload else None,
+            "carrier_name": existing_upload.get("carrier_name") if existing_upload else None,
+            "created_at": existing_upload.get("created_at") if existing_upload else None
+        } if existing_upload else None,
+        "reason": _get_conflict_reason(conflict)
+    }
+
+def _get_conflict_reason(conflict: dict) -> str:
+    """Generate human-readable conflict reason"""
+    ctype = conflict.get("conflict_type", "unknown")
+    field = conflict.get("field_name", "unknown field")
+    
+    if ctype == "mismatch":
+        return f"The field '{field}' has different values in the existing record vs the new upload. This happens when the same record (matched by primary key) has conflicting data."
+    elif ctype == "duplicate":
+        return "A record with the same primary key values already exists. This could be a true duplicate or an update to existing data."
+    else:
+        return "Data conflict detected between existing and newly uploaded records."
+
+@api_router.get("/export/approved")
+async def export_approved_data(
+    format: str = "csv",
+    carrier_id: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Export approved data in various formats"""
+    query = {"status": "validated"}
+    if carrier_id:
+        query["carrier_id"] = carrier_id
+    
+    records = await db.extracted_records.find(query, {"_id": 0}).to_list(100000)
+    
+    if not records:
+        raise HTTPException(status_code=404, detail="No approved data to export")
+    
+    # Get all unique fields
+    all_fields = set()
+    for r in records:
+        for k in r.get("mapped_data", {}).keys():
+            if not k.startswith("_"):
+                all_fields.add(k)
+    fields = sorted(list(all_fields))
+    
+    if format == "json":
+        # JSON format - good for API integrations
+        export_data = []
+        for r in records:
+            row = {"_record_id": r["id"]}
+            for f in fields:
+                row[f] = r.get("mapped_data", {}).get(f)
+            export_data.append(row)
+        return {"format": "json", "count": len(export_data), "data": export_data}
+    
+    elif format == "zoho":
+        # Zoho CRM format - specific field mapping for Zoho
+        export_data = []
+        for r in records:
+            mapped = r.get("mapped_data", {})
+            row = {
+                "Account_Name": mapped.get("broker_name") or mapped.get("agent_name", ""),
+                "Account_Number": mapped.get("broker_id") or mapped.get("agent_code", ""),
+                "Industry": "Insurance",
+                "Annual_Revenue": mapped.get("amount") or mapped.get("premium", 0),
+                "Description": f"Policy Type: {mapped.get('policy_type', 'N/A')}, State: {mapped.get('state', 'N/A')}",
+                "Billing_State": mapped.get("state", ""),
+                "Record_Source": "Rev-Box Import"
+            }
+            export_data.append(row)
+        return {"format": "zoho", "count": len(export_data), "data": export_data}
+    
+    else:
+        # CSV format (default)
+        import io
+        import csv
+        
+        output = io.StringIO()
+        writer = csv.DictWriter(output, fieldnames=fields)
+        writer.writeheader()
+        
+        for r in records:
+            row = {}
+            for f in fields:
+                val = r.get("mapped_data", {}).get(f)
+                row[f] = str(val) if val is not None else ""
+            writer.writerow(row)
+        
+        return {
+            "format": "csv",
+            "count": len(records),
+            "csv_content": output.getvalue()
+        }
+
 @api_router.put("/conflicts/{conflict_id}/resolve")
 async def resolve_conflict(
     conflict_id: str,
