@@ -335,6 +335,48 @@ async def delete_carrier(carrier_id: str, current_user: dict = Depends(get_curre
     return {"message": "Carrier deleted"}
 
 # =============================================================================
+# CUSTOM FIELDS ROUTES
+# =============================================================================
+
+@api_router.get("/custom-fields")
+async def get_custom_fields(current_user: dict = Depends(get_current_user)):
+    """Get all custom fields defined in the system"""
+    fields = await db.custom_fields.find({}, {"_id": 0}).to_list(1000)
+    return fields
+
+@api_router.post("/custom-fields")
+async def create_custom_field(
+    field_name: str,
+    field_label: str,
+    field_type: str = "text",
+    current_user: dict = Depends(get_current_user)
+):
+    """Create a new custom field"""
+    # Check if field already exists
+    existing = await db.custom_fields.find_one({"field_name": field_name})
+    if existing:
+        raise HTTPException(status_code=400, detail="Field already exists")
+    
+    field_doc = {
+        "id": str(uuid.uuid4()),
+        "field_name": field_name.lower().replace(" ", "_"),
+        "field_label": field_label,
+        "field_type": field_type,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_by": current_user["id"]
+    }
+    await db.custom_fields.insert_one(field_doc)
+    return {"message": "Custom field created", "field": field_doc}
+
+@api_router.delete("/custom-fields/{field_name}")
+async def delete_custom_field(field_name: str, current_user: dict = Depends(get_current_user)):
+    """Delete a custom field"""
+    result = await db.custom_fields.delete_one({"field_name": field_name})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Field not found")
+    return {"message": "Custom field deleted"}
+
+# =============================================================================
 # AGENT ROUTES
 # =============================================================================
 
