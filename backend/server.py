@@ -700,6 +700,58 @@ async def get_upload_records(upload_id: str, current_user: dict = Depends(get_cu
     records = await db.extracted_records.find({"upload_id": upload_id}, {"_id": 0}).to_list(10000)
     return [ExtractedRecordResponse(**r) for r in records]
 
+@api_router.post("/uploads/preview")
+async def preview_file_structure(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
+):
+    """Preview Excel file structure to help configure carrier parsing settings"""
+    file_ext = Path(file.filename).suffix.lower()
+    if file_ext not in ['.xlsx', '.xls']:
+        raise HTTPException(status_code=400, detail="Preview only supports Excel files")
+    
+    # Save temp file
+    temp_path = UPLOAD_DIR / f"temp_preview_{uuid.uuid4()}{file_ext}"
+    async with aiofiles.open(temp_path, 'wb') as out_file:
+        content = await file.read()
+        await out_file.write(content)
+    
+    try:
+        wb = load_workbook(str(temp_path), data_only=True)
+        sheet = wb.active
+        
+        # Get first 10 rows for preview
+        preview_rows = []
+        for row_idx in range(1, min(11, sheet.max_row + 1)):
+            row_data = []
+            for col in range(1, min(20, sheet.max_column + 1)):
+                val = sheet.cell(row=row_idx, column=col).value
+                row_data.append(str(val)[:50] if val else None)
+            preview_rows.append({
+                "row_number": row_idx,
+                "values": row_data
+            })
+        
+        # Detect likely header row
+        suggested_header_row = 1
+        for row in preview_rows:
+            non_null_count = sum(1 for v in row["values"] if v is not None)
+            if non_null_count >= 5:
+                suggested_header_row = row["row_number"]
+                break
+        
+        return {
+            "filename": file.filename,
+            "total_rows": sheet.max_row,
+            "total_columns": sheet.max_column,
+            "preview_rows": preview_rows,
+            "suggested_header_row": suggested_header_row,
+            "suggested_data_start_row": suggested_header_row + 1
+        }
+    finally:
+        if temp_path.exists():
+            temp_path.unlink()
+
 # =============================================================================
 # RECORDS & CONFLICTS ROUTES
 # =============================================================================
