@@ -11,11 +11,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { 
   CheckCircle, 
   Download,
   Search,
-  FileSpreadsheet
+  FileSpreadsheet,
+  FileJson,
+  FileText,
+  ExternalLink
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -26,6 +36,8 @@ export default function ApprovedDataPage() {
   const [loading, setLoading] = useState(true);
   const [sourceFilter, setSourceFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [showExportDialog, setShowExportDialog] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -49,42 +61,52 @@ export default function ApprovedDataPage() {
     }
   };
 
-  const exportToCSV = () => {
-    if (records.length === 0) {
-      toast.error('No data to export');
-      return;
+  const handleExport = async (format) => {
+    setExporting(true);
+    try {
+      const params = { format };
+      if (sourceFilter !== 'all') params.carrier_id = sourceFilter;
+      
+      const response = await axios.get(`${API}/export/approved`, { params });
+      
+      if (format === 'csv') {
+        // Download CSV
+        const blob = new Blob([response.data.csv_content], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `revbox-export-${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast.success(`Exported ${response.data.count} records to CSV`);
+      } else if (format === 'json') {
+        // Download JSON
+        const blob = new Blob([JSON.stringify(response.data.data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `revbox-export-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast.success(`Exported ${response.data.count} records to JSON`);
+      } else if (format === 'zoho') {
+        // Download Zoho-formatted JSON
+        const blob = new Blob([JSON.stringify(response.data.data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `zoho-import-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast.success(`Exported ${response.data.count} records in Zoho format`);
+      }
+      
+      setShowExportDialog(false);
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Export failed');
+    } finally {
+      setExporting(false);
     }
-
-    // Get all unique keys from mapped_data
-    const allKeys = new Set();
-    records.forEach(r => {
-      Object.keys(r.mapped_data || {}).forEach(k => {
-        if (!k.startsWith('_')) allKeys.add(k);
-      });
-    });
-    const headers = Array.from(allKeys);
-
-    // Build CSV
-    const csvRows = [headers.join(',')];
-    records.forEach(r => {
-      const row = headers.map(h => {
-        const val = r.mapped_data?.[h];
-        if (val === null || val === undefined) return '';
-        const str = String(val);
-        return str.includes(',') ? `"${str}"` : str;
-      });
-      csvRows.push(row.join(','));
-    });
-
-    // Download
-    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `approved-data-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success('Data exported');
   };
 
   const filteredRecords = records.filter(r => {
@@ -109,11 +131,11 @@ export default function ApprovedDataPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-slate-900">Approved Data</h1>
-            <p className="text-sm text-slate-500 mt-1">Data that has been reviewed and approved</p>
+            <p className="text-sm text-slate-500 mt-1">Clean, validated data ready for export</p>
           </div>
-          <Button onClick={exportToCSV} className="btn-primary" data-testid="export-btn">
+          <Button onClick={() => setShowExportDialog(true)} className="btn-primary" data-testid="export-btn">
             <Download className="w-4 h-4 mr-2" />
-            Export CSV
+            Export Data
           </Button>
         </div>
       </header>
@@ -142,6 +164,17 @@ export default function ApprovedDataPage() {
               ))}
             </SelectContent>
           </Select>
+        </div>
+
+        {/* Stats */}
+        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <CheckCircle className="w-5 h-5 text-emerald-600" />
+            <span className="text-emerald-800 font-medium">{filteredRecords.length} approved records</span>
+          </div>
+          {filteredRecords.length > 0 && (
+            <span className="text-sm text-emerald-600">Ready for export to CRM</span>
+          )}
         </div>
 
         {/* Data Table */}
@@ -207,6 +240,74 @@ export default function ApprovedDataPage() {
           </div>
         )}
       </div>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Export Approved Data</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-slate-500 mb-4">
+              Choose an export format. {filteredRecords.length} records will be exported.
+            </p>
+            <div className="space-y-3">
+              {/* CSV Export */}
+              <button
+                onClick={() => handleExport('csv')}
+                disabled={exporting || filteredRecords.length === 0}
+                className="w-full flex items-center gap-4 p-4 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors text-left disabled:opacity-50"
+                data-testid="export-csv-btn"
+              >
+                <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
+                  <FileText className="w-6 h-6 text-emerald-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-slate-900">CSV Format</p>
+                  <p className="text-sm text-slate-500">Compatible with Excel, Google Sheets, most CRMs</p>
+                </div>
+              </button>
+
+              {/* JSON Export */}
+              <button
+                onClick={() => handleExport('json')}
+                disabled={exporting || filteredRecords.length === 0}
+                className="w-full flex items-center gap-4 p-4 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors text-left disabled:opacity-50"
+                data-testid="export-json-btn"
+              >
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <FileJson className="w-6 h-6 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-slate-900">JSON Format</p>
+                  <p className="text-sm text-slate-500">For API integrations and custom imports</p>
+                </div>
+              </button>
+
+              {/* Zoho Export */}
+              <button
+                onClick={() => handleExport('zoho')}
+                disabled={exporting || filteredRecords.length === 0}
+                className="w-full flex items-center gap-4 p-4 border border-blue-200 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors text-left disabled:opacity-50"
+                data-testid="export-zoho-btn"
+              >
+                <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <ExternalLink className="w-6 h-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-blue-900">Zoho CRM Format</p>
+                  <p className="text-sm text-blue-700">Pre-formatted for Zoho CRM import</p>
+                </div>
+              </button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
