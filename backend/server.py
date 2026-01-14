@@ -975,18 +975,39 @@ async def export_approved_data(
         return {"format": "json", "count": len(export_data), "data": export_data}
     
     elif format == "zoho":
-        # Zoho CRM format - specific field mapping for Zoho
+        # Zoho CRM format - maps to Zoho Account and Contact fields
         export_data = []
         for r in records:
             mapped = r.get("mapped_data", {})
             row = {
+                # Account fields (from Zoho Accounts)
+                "AC_Account_Number": mapped.get("broker_id") or mapped.get("agent_code", ""),
                 "Account_Name": mapped.get("broker_name") or mapped.get("agent_name", ""),
-                "Account_Number": mapped.get("broker_id") or mapped.get("agent_code", ""),
-                "Industry": "Insurance",
-                "Annual_Revenue": mapped.get("amount") or mapped.get("premium", 0),
-                "Description": f"Policy Type: {mapped.get('policy_type', 'N/A')}, State: {mapped.get('state', 'N/A')}",
-                "Billing_State": mapped.get("state", ""),
-                "Record_Source": "Rev-Box Import"
+                "Account_Owner": "",  # Would need to be set in Zoho
+                "Account_Type": "Brokers - Member",  # Default type
+                "Entity_Type": "LLC",  # Default, would need mapping
+                
+                # Contact fields (from Zoho Contacts)
+                "Primary_Contact": mapped.get("agent_name", ""),
+                "Email": mapped.get("email", ""),
+                "Mobile": mapped.get("phone", ""),
+                "Mailing_Street": mapped.get("address", ""),
+                "Mailing_City": mapped.get("city", ""),
+                "Mailing_State": mapped.get("state", ""),
+                "Mailing_Zip": mapped.get("zip", ""),
+                
+                # Business metrics
+                "New_WP": mapped.get("new_wp") or mapped.get("new_written_premium", ""),
+                "Total_WP": mapped.get("total_wp") or mapped.get("premium") or mapped.get("amount", ""),
+                "Earned_Premium": mapped.get("earned", ""),
+                "Incurred": mapped.get("incurred", ""),
+                "Loss_Ratio": mapped.get("loss_ratio", ""),
+                "Policy_Type": mapped.get("policy_type", ""),
+                "PG_Code": mapped.get("pg_code", ""),
+                
+                # Metadata
+                "Record_Source": "Rev-Box Import",
+                "Import_Date": datetime.now(timezone.utc).strftime("%Y-%m-%d")
             }
             export_data.append(row)
         return {"format": "zoho", "count": len(export_data), "data": export_data}
