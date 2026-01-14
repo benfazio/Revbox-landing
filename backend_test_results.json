@@ -1,8 +1,8 @@
 {
-  "timestamp": "2026-01-14T18:31:02.334881",
-  "total_tests": 19,
-  "passed_tests": 19,
-  "success_rate": 100.0,
+  "timestamp": "2026-01-14T18:44:52.327146",
+  "total_tests": 15,
+  "passed_tests": 14,
+  "success_rate": 93.33333333333333,
   "test_details": [
     {
       "test": "User Registration",
@@ -56,28 +56,8 @@
     },
     {
       "test": "Create Agent",
-      "success": true,
-      "details": "Status: 200"
-    },
-    {
-      "test": "Get All Agents",
-      "success": true,
-      "details": "Status: 200"
-    },
-    {
-      "test": "Get Agent by ID",
-      "success": true,
-      "details": "Status: 200"
-    },
-    {
-      "test": "Update Agent",
-      "success": true,
-      "details": "Status: 200"
-    },
-    {
-      "test": "Delete Agent",
-      "success": true,
-      "details": "Status: 200"
+      "success": false,
+      "details": "Status: 400, Expected: 200, Error: Agent code already exists"
     },
     {
       "test": "Get All Uploads",
