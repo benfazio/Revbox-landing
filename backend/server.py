@@ -378,24 +378,56 @@ async def delete_agent(agent_id: str, current_user: dict = Depends(get_current_u
 # FILE PROCESSING HELPERS
 # =============================================================================
 
-async def extract_excel_data(file_path: str) -> List[Dict[str, Any]]:
-    """Extract data from Excel file"""
+async def extract_excel_data(file_path: str, header_row: int = None, start_row: int = None) -> List[Dict[str, Any]]:
+    """Extract data from Excel file with smart header detection"""
     wb = load_workbook(file_path, data_only=True)
     sheet = wb.active
     
     headers = []
     data = []
     
-    for row_idx, row in enumerate(sheet.iter_rows(values_only=True)):
-        if row_idx == 0:
-            headers = [str(cell) if cell else f"column_{i}" for i, cell in enumerate(row)]
-        else:
-            if any(cell is not None for cell in row):
-                row_data = {}
-                for i, cell in enumerate(row):
-                    if i < len(headers):
-                        row_data[headers[i]] = cell
-                data.append(row_data)
+    # If header_row not specified, detect it by finding first row with multiple non-empty cells
+    if header_row is None:
+        for row_idx in range(1, min(20, sheet.max_row + 1)):
+            row_values = [sheet.cell(row=row_idx, column=col).value for col in range(1, min(50, sheet.max_column + 1))]
+            non_empty = [v for v in row_values if v is not None and str(v).strip()]
+            # A header row typically has multiple text values
+            if len(non_empty) >= 5:
+                header_row = row_idx
+                break
+        if header_row is None:
+            header_row = 1
+    
+    if start_row is None:
+        start_row = header_row + 1
+    
+    # Extract headers
+    for col in range(1, sheet.max_column + 1):
+        val = sheet.cell(row=header_row, column=col).value
+        headers.append(str(val).strip() if val else f"column_{col}")
+    
+    # Extract data rows
+    for row_idx in range(start_row, sheet.max_row + 1):
+        row_values = [sheet.cell(row=row_idx, column=col).value for col in range(1, sheet.max_column + 1)]
+        
+        # Skip empty rows
+        if not any(v is not None for v in row_values):
+            continue
+            
+        row_data = {}
+        for i, val in enumerate(row_values):
+            if i < len(headers):
+                header = headers[i]
+                # Clean up the value
+                if val is not None:
+                    row_data[header] = val
+                else:
+                    row_data[header] = None
+        
+        # Only add if row has meaningful data (at least 3 non-null values)
+        non_null_count = sum(1 for v in row_data.values() if v is not None)
+        if non_null_count >= 3:
+            data.append(row_data)
     
     return data
 
