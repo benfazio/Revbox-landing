@@ -9,7 +9,8 @@
 
 /* Sidebar navigation */
 .nav-item {
-  @apply flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-white transition-colors duration-150 cursor-pointer;
+  @apply flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer;
+  transition: background-color 0.15s, color 0.15s;
 }
 
 .nav-item.active {
@@ -22,20 +23,28 @@
 
 /* Page header */
 .page-header {
-  @apply sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-slate-200 px-8 py-4;
+  @apply sticky top-0 z-40 bg-white/80 border-b border-slate-200 px-8 py-4;
+  backdrop-filter: blur(12px);
 }
 
 /* Metric cards */
 .metric-card {
-  @apply bg-white border border-slate-200 p-6 hover:-translate-y-1 hover:shadow-lg transition-all duration-200;
+  @apply bg-white border border-slate-200 p-6;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.metric-card:hover {
+  @apply -translate-y-1 shadow-lg;
 }
 
 .metric-value {
-  @apply text-3xl font-bold tracking-tight text-slate-900 font-heading;
+  @apply text-3xl font-bold tracking-tight text-slate-900;
+  font-family: 'Manrope', sans-serif;
 }
 
 .metric-label {
-  @apply text-sm font-medium text-slate-500 uppercase tracking-wider mt-1;
+  @apply text-sm font-medium text-slate-500 uppercase mt-1;
+  letter-spacing: 0.05em;
 }
 
 /* Data tables */
@@ -44,7 +53,8 @@
 }
 
 .data-table th {
-  @apply bg-slate-50 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider px-4 py-3 border-b border-slate-200;
+  @apply bg-slate-50 text-left text-xs font-semibold text-slate-600 uppercase px-4 py-3 border-b border-slate-200;
+  letter-spacing: 0.05em;
 }
 
 .data-table td {
@@ -66,7 +76,8 @@
 
 /* Dropzone */
 .dropzone {
-  @apply border-2 border-dashed border-slate-300 rounded-lg p-12 text-center cursor-pointer transition-colors duration-150;
+  @apply border-2 border-dashed border-slate-300 rounded-lg p-12 text-center cursor-pointer;
+  transition: border-color 0.15s, background-color 0.15s;
 }
 
 .dropzone:hover,
@@ -80,7 +91,8 @@
 }
 
 .field-badge {
-  @apply inline-flex items-center px-2.5 py-1 rounded text-xs font-mono font-medium bg-slate-100 text-slate-700 border border-slate-200;
+  @apply inline-flex items-center px-2.5 py-1 rounded text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 /* Conflict indicator */
@@ -107,19 +119,23 @@
 
 /* Button variants */
 .btn-primary {
-  @apply bg-slate-900 text-white hover:bg-slate-800 px-4 py-2 text-sm font-medium transition-colors duration-150;
+  @apply bg-slate-900 text-white hover:bg-slate-800 px-4 py-2 text-sm font-medium rounded-md;
+  transition: background-color 0.15s;
 }
 
 .btn-secondary {
-  @apply bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 px-4 py-2 text-sm font-medium transition-colors duration-150;
+  @apply bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 px-4 py-2 text-sm font-medium rounded-md;
+  transition: background-color 0.15s;
 }
 
 .btn-accent {
-  @apply bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 text-sm font-medium transition-colors duration-150;
+  @apply bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 text-sm font-medium rounded-md;
+  transition: background-color 0.15s;
 }
 
 .btn-danger {
-  @apply bg-red-600 text-white hover:bg-red-700 px-4 py-2 text-sm font-medium transition-colors duration-150;
+  @apply bg-red-600 text-white hover:bg-red-700 px-4 py-2 text-sm font-medium rounded-md;
+  transition: background-color 0.15s;
 }
 
 /* Loading spinner */
@@ -134,5 +150,14 @@
 
 /* Toast customization */
 [data-sonner-toast] {
-  font-family: var(--font-body);
+  font-family: 'Inter', sans-serif;
+}
+
+/* Font classes */
+.font-heading {
+  font-family: 'Manrope', sans-serif;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
 }
