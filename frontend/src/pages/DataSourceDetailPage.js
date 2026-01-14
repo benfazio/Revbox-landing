@@ -14,24 +14,41 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowLeft, Plus, Trash2, Sparkles, Save, Eye, FileSpreadsheet } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { ArrowLeft, Plus, Trash2, Save, Eye, PlusCircle } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
+// Standard fields + will be combined with custom fields
 const STANDARD_FIELDS = [
   { value: 'policy_number', label: 'Policy Number' },
-  { value: 'agent_code', label: 'Agent Code' },
-  { value: 'agent_name', label: 'Agent Name' },
+  { value: 'agent_code', label: 'Agent Code / Agency ID' },
+  { value: 'agent_name', label: 'Agent Name / Agency Name' },
   { value: 'broker_id', label: 'Broker ID' },
   { value: 'broker_name', label: 'Broker Name' },
   { value: 'amount', label: 'Amount' },
   { value: 'commission', label: 'Commission' },
-  { value: 'premium', label: 'Premium' },
+  { value: 'premium', label: 'Premium / Total WP' },
+  { value: 'new_wp', label: 'New Written Premium' },
+  { value: 'earned', label: 'Earned Premium' },
+  { value: 'incurred', label: 'Incurred' },
+  { value: 'loss_ratio', label: 'Loss Ratio' },
   { value: 'effective_date', label: 'Effective Date' },
   { value: 'insured_name', label: 'Insured Name' },
   { value: 'policy_type', label: 'Policy Type / LOB' },
   { value: 'state', label: 'State' },
-  { value: 'transaction_date', label: 'Transaction Date' },
+  { value: 'pg_code', label: 'PG Code / Parent Code' },
+  { value: 'email', label: 'Email' },
+  { value: 'phone', label: 'Phone / Mobile' },
+  { value: 'address', label: 'Address / Street' },
+  { value: 'city', label: 'City' },
+  { value: 'zip', label: 'Zip Code' },
   { value: 'quotes', label: 'Quotes' },
   { value: 'policies', label: 'Policies' },
   { value: 'pif', label: 'Policies In Force' },
@@ -43,15 +60,19 @@ export default function DataSourceDetailPage() {
   const [source, setSource] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [suggesting, setSuggesting] = useState(false);
   const [mappings, setMappings] = useState([]);
   const [primaryKeys, setPrimaryKeys] = useState([]);
   const [headerRow, setHeaderRow] = useState('');
   const [dataStartRow, setDataStartRow] = useState('');
   const [previewData, setPreviewData] = useState(null);
+  const [customFields, setCustomFields] = useState([]);
+  const [showAddFieldDialog, setShowAddFieldDialog] = useState(false);
+  const [newFieldName, setNewFieldName] = useState('');
+  const [newFieldLabel, setNewFieldLabel] = useState('');
 
   useEffect(() => {
     fetchSource();
+    fetchCustomFields();
   }, [id]);
 
   const fetchSource = async () => {
@@ -73,6 +94,20 @@ export default function DataSourceDetailPage() {
       setLoading(false);
     }
   };
+
+  const fetchCustomFields = async () => {
+    try {
+      const response = await axios.get(`${API}/custom-fields`);
+      setCustomFields(response.data);
+    } catch (error) {
+      console.error('Failed to fetch custom fields');
+    }
+  };
+
+  const allFields = [
+    ...STANDARD_FIELDS,
+    ...customFields.map(f => ({ value: f.field_name, label: `${f.field_label} (custom)` }))
+  ];
 
   const onDropPreview = useCallback(async (acceptedFiles) => {
     if (acceptedFiles.length === 0) return;
@@ -102,46 +137,62 @@ export default function DataSourceDetailPage() {
     maxFiles: 1
   });
 
-  const handleSuggestMappings = async () => {
+  const handleSuggestMappings = () => {
     if (!previewData) {
       toast.error('Upload a sample file first');
       return;
     }
     
-    setSuggesting(true);
+    const headerRowData = previewData.preview_rows.find(r => r.row_number === parseInt(headerRow));
+    if (headerRowData) {
+      const suggestedMappings = headerRowData.values
+        .filter(v => v)
+        .map(sourceField => {
+          const normalized = sourceField.toLowerCase().replace(/[_\s]+/g, '');
+          let targetField = '';
+          
+          if (normalized.includes('agency') && normalized.includes('id')) targetField = 'agent_code';
+          else if (normalized.includes('agency') && normalized.includes('name')) targetField = 'agent_name';
+          else if (normalized.includes('broker') && normalized.includes('id')) targetField = 'broker_id';
+          else if (normalized.includes('broker') && normalized.includes('name')) targetField = 'broker_name';
+          else if (normalized.includes('agent') && normalized.includes('code')) targetField = 'agent_code';
+          else if (normalized.includes('agent') && normalized.includes('name')) targetField = 'agent_name';
+          else if (normalized === 'agency' || normalized === 'agencycode') targetField = 'agent_code';
+          else if (normalized === 'name') targetField = 'agent_name';
+          else if (normalized.includes('pgcode') || normalized.includes('parentcode')) targetField = 'pg_code';
+          else if (normalized.includes('newwp') || normalized.includes('newwritten')) targetField = 'new_wp';
+          else if (normalized.includes('totwp') || normalized.includes('totalwp')) targetField = 'premium';
+          else if (normalized.includes('earned')) targetField = 'earned';
+          else if (normalized.includes('incurred')) targetField = 'incurred';
+          else if (normalized.includes('lossratio')) targetField = 'loss_ratio';
+          else if (normalized.includes('lob') || normalized.includes('policytype')) targetField = 'policy_type';
+          else if (normalized.includes('state')) targetField = 'state';
+          else if (normalized.includes('email')) targetField = 'email';
+          else if (normalized.includes('phone') || normalized.includes('mobile')) targetField = 'phone';
+          
+          return { source: sourceField, target: targetField };
+        });
+      
+      setMappings(suggestedMappings.length > 0 ? suggestedMappings : [{ source: '', target: '' }]);
+      toast.success('Mappings suggested based on column headers');
+    }
+  };
+
+  const handleAddCustomField = async () => {
+    if (!newFieldName || !newFieldLabel) {
+      toast.error('Please enter both field name and label');
+      return;
+    }
+    
     try {
-      // Use the header row from preview to suggest mappings
-      const headerRowData = previewData.preview_rows.find(r => r.row_number === parseInt(headerRow));
-      if (headerRowData) {
-        const suggestedMappings = headerRowData.values
-          .filter(v => v)
-          .map(sourceField => {
-            // Try to auto-match to standard fields
-            const normalized = sourceField.toLowerCase().replace(/[_\s]+/g, '');
-            let targetField = '';
-            
-            if (normalized.includes('broker') && normalized.includes('id')) targetField = 'broker_id';
-            else if (normalized.includes('broker') && normalized.includes('name')) targetField = 'broker_name';
-            else if (normalized.includes('agent') && normalized.includes('code')) targetField = 'agent_code';
-            else if (normalized.includes('agent') && normalized.includes('name')) targetField = 'agent_name';
-            else if (normalized.includes('main') && normalized.includes('id')) targetField = 'agent_code';
-            else if (normalized.includes('main') && normalized.includes('name')) targetField = 'agent_name';
-            else if (normalized.includes('lob') || normalized.includes('lineofbusiness')) targetField = 'policy_type';
-            else if (normalized.includes('state')) targetField = 'state';
-            else if (normalized.includes('premium') || normalized.includes('writtenpremium')) targetField = 'premium';
-            else if (normalized.includes('quote')) targetField = 'quotes';
-            else if (normalized.includes('polic') && !normalized.includes('type')) targetField = 'policies';
-            else if (normalized.includes('pif')) targetField = 'pif';
-            else if (normalized.includes('date') || normalized.includes('month')) targetField = 'effective_date';
-            
-            return { source: sourceField, target: targetField };
-          });
-        
-        setMappings(suggestedMappings.length > 0 ? suggestedMappings : [{ source: '', target: '' }]);
-        toast.success('Mappings suggested based on column headers');
-      }
-    } finally {
-      setSuggesting(false);
+      await axios.post(`${API}/custom-fields?field_name=${encodeURIComponent(newFieldName)}&field_label=${encodeURIComponent(newFieldLabel)}`);
+      toast.success('Custom field added');
+      fetchCustomFields();
+      setShowAddFieldDialog(false);
+      setNewFieldName('');
+      setNewFieldLabel('');
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to add field');
     }
   };
 
@@ -155,12 +206,6 @@ export default function DataSourceDetailPage() {
         }
       });
 
-      await axios.put(`${API}/carriers/${id}/field-mappings`, {
-        field_mappings: fieldMappings,
-        primary_key_fields: primaryKeys
-      });
-
-      // Also update header/data rows
       await axios.put(`${API}/carriers/${id}`, {
         name: source.name,
         code: source.code,
@@ -236,7 +281,7 @@ export default function DataSourceDetailPage() {
         <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-slate-200">
             <h2 className="font-semibold text-slate-900">File Structure Preview</h2>
-            <p className="text-sm text-slate-500">Upload a sample file to preview structure and auto-detect headers</p>
+            <p className="text-sm text-slate-500">Upload a sample file to preview structure</p>
           </div>
           <div className="p-6">
             <div
@@ -248,7 +293,7 @@ export default function DataSourceDetailPage() {
             >
               <input {...getInputProps()} />
               <Eye className="w-10 h-10 text-slate-400 mx-auto mb-3" />
-              <p className="text-sm text-slate-600">Drop a sample Excel file to preview structure</p>
+              <p className="text-sm text-slate-600">Drop a sample Excel file to preview</p>
             </div>
 
             {previewData && (
@@ -263,7 +308,6 @@ export default function DataSourceDetailPage() {
                         onChange={(e) => setHeaderRow(e.target.value)}
                         className="w-24 font-mono"
                         min="1"
-                        data-testid="header-row-input"
                       />
                     </div>
                     <div>
@@ -274,12 +318,10 @@ export default function DataSourceDetailPage() {
                         onChange={(e) => setDataStartRow(e.target.value)}
                         className="w-24 font-mono"
                         min="1"
-                        data-testid="data-start-input"
                       />
                     </div>
                   </div>
-                  <Button onClick={handleSuggestMappings} disabled={suggesting} variant="outline">
-                    <Sparkles className="w-4 h-4 mr-2" />
+                  <Button onClick={handleSuggestMappings} variant="outline">
                     Suggest Mappings
                   </Button>
                 </div>
@@ -291,23 +333,19 @@ export default function DataSourceDetailPage() {
                         <tr 
                           key={row.row_number}
                           className={
-                            row.row_number === parseInt(headerRow) ? 'bg-blue-50 font-semibold' :
-                            row.row_number === parseInt(dataStartRow) ? 'bg-emerald-50' : ''
+                            row.row_number === parseInt(headerRow) ? 'bg-blue-100 font-semibold' :
+                            row.row_number === parseInt(dataStartRow) ? 'bg-emerald-100' : ''
                           }
                         >
-                          <td className="w-12 text-center text-slate-400 border-r">{row.row_number}</td>
-                          {row.values.slice(0, 10).map((val, idx) => (
-                            <td key={idx} className="truncate max-w-32">{val || '-'}</td>
+                          <td className="w-12 text-center text-slate-400 border-r bg-slate-50">{row.row_number}</td>
+                          {row.values.slice(0, 12).map((val, idx) => (
+                            <td key={idx} className="truncate max-w-24 px-2">{val || '-'}</td>
                           ))}
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
-                <p className="text-xs text-slate-500 mt-2">
-                  <span className="inline-block w-3 h-3 bg-blue-100 rounded mr-1"></span> Header row
-                  <span className="inline-block w-3 h-3 bg-emerald-100 rounded ml-3 mr-1"></span> Data start row
-                </p>
               </div>
             )}
           </div>
@@ -320,10 +358,16 @@ export default function DataSourceDetailPage() {
               <h2 className="font-semibold text-slate-900">Field Mappings</h2>
               <p className="text-sm text-slate-500">Map source columns to standard fields</p>
             </div>
-            <Button onClick={addMapping} variant="outline" size="sm" data-testid="add-mapping-btn">
-              <Plus className="w-4 h-4 mr-1" />
-              Add Mapping
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={() => setShowAddFieldDialog(true)} variant="outline" size="sm">
+                <PlusCircle className="w-4 h-4 mr-1" />
+                Add Custom Field
+              </Button>
+              <Button onClick={addMapping} variant="outline" size="sm">
+                <Plus className="w-4 h-4 mr-1" />
+                Add Mapping
+              </Button>
+            </div>
           </div>
 
           <div className="p-6">
@@ -339,7 +383,6 @@ export default function DataSourceDetailPage() {
                 <div 
                   key={index} 
                   className="grid grid-cols-12 gap-4 items-center p-3 bg-slate-50 rounded-lg"
-                  data-testid={`mapping-row-${index}`}
                 >
                   <div className="col-span-5">
                     <Input
@@ -347,7 +390,6 @@ export default function DataSourceDetailPage() {
                       onChange={(e) => updateMapping(index, 'source', e.target.value)}
                       placeholder="Source column name"
                       className="font-mono text-sm"
-                      data-testid={`mapping-source-${index}`}
                     />
                   </div>
                   <div className="col-span-5">
@@ -355,11 +397,11 @@ export default function DataSourceDetailPage() {
                       value={mapping.target}
                       onValueChange={(value) => updateMapping(index, 'target', value)}
                     >
-                      <SelectTrigger data-testid={`mapping-target-${index}`}>
+                      <SelectTrigger>
                         <SelectValue placeholder="Select field" />
                       </SelectTrigger>
                       <SelectContent>
-                        {STANDARD_FIELDS.map((field) => (
+                        {allFields.map((field) => (
                           <SelectItem key={field.value} value={field.value}>
                             {field.label}
                           </SelectItem>
@@ -372,14 +414,12 @@ export default function DataSourceDetailPage() {
                       checked={primaryKeys.includes(mapping.target)}
                       onCheckedChange={() => mapping.target && togglePrimaryKey(mapping.target)}
                       disabled={!mapping.target}
-                      data-testid={`mapping-pk-${index}`}
                     />
                   </div>
                   <div className="col-span-1 flex justify-center">
                     <button
                       onClick={() => removeMapping(index)}
                       className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      data-testid={`remove-mapping-${index}`}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -394,18 +434,56 @@ export default function DataSourceDetailPage() {
                 <div className="flex flex-wrap gap-2">
                   {primaryKeys.map((key) => (
                     <span key={key} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-mono">
-                      {STANDARD_FIELDS.find(f => f.value === key)?.label || key}
+                      {allFields.find(f => f.value === key)?.label || key}
                     </span>
                   ))}
                 </div>
                 <p className="text-xs text-blue-600 mt-2">
-                  Used to detect duplicates and link records across uploads
+                  Used to detect duplicates and link records
                 </p>
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* Add Custom Field Dialog */}
+      <Dialog open={showAddFieldDialog} onOpenChange={setShowAddFieldDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Custom Field</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Field Name (system)</Label>
+              <Input
+                value={newFieldName}
+                onChange={(e) => setNewFieldName(e.target.value.toLowerCase().replace(/\s/g, '_'))}
+                placeholder="e.g., ytd_premium"
+                className="font-mono"
+              />
+              <p className="text-xs text-slate-500">Lowercase, no spaces (used in exports)</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Display Label</Label>
+              <Input
+                value={newFieldLabel}
+                onChange={(e) => setNewFieldLabel(e.target.value)}
+                placeholder="e.g., YTD Premium"
+              />
+              <p className="text-xs text-slate-500">How it appears in the UI</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddFieldDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddCustomField} className="btn-primary">
+              Add Field
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
