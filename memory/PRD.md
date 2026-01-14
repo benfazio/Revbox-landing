@@ -1,101 +1,103 @@
-# PayoutHub - Insurance Aggregator CRM
+# Rev-Box Data Management
 ## Product Requirements Document
 
 ### Original Problem Statement
-Build a CRM-like system for a P&C (Property & Casualty) insurance aggregator company. The company facilitates payouts from different insurance carriers to agents - they are not an agency themselves. The system needs to:
-- Take in reports from insurance carriers in various formats (PDFs, Excel)
-- Break down information into correct fields
-- Identify conflicts in data
-- Handle different formats with different primary key fields
-- Allow custom field mapping per carrier
-- Focus heavily on data formatting and extraction
+Build a data management/formatting tool for a P&C insurance aggregator company. The company facilitates payouts from different insurance carriers to agents. Key requirements:
+- Focus on DATA FORMATTING AND EXTRACTION over traditional CRM
+- Take in reports from carriers in various formats (PDFs, Excel)
+- Custom field mapping per carrier/data source
+- Staging area for holding data before approval
+- Side-by-side conflict resolution with full context
+- Ability to delete bad uploads easily
+- Table linking through primary keys (broker ID, agent code, etc.)
 
 ### User Personas
-1. **Operations Manager** - Reviews extracted data, resolves conflicts, approves payouts
-2. **Data Administrator** - Configures carriers, sets up field mappings, manages agents
-3. **Finance Team** - Tracks payouts, generates reports, marks payments complete
+1. **Data Administrator** - Configures data sources, sets up field mappings
+2. **Operations Staff** - Reviews staged data, resolves conflicts, approves records
+3. **Analyst** - Links tables, exports approved data for reporting
 
 ### Core Requirements (Static)
 - Secure JWT authentication
-- Carrier management with custom field mapping per carrier
-- Agent/Payee management with commission tracking
-- Document upload (PDF, Excel, CSV) with AI-powered extraction
-- Conflict detection (duplicates, field mismatches)
-- Data review and validation workflow
-- Payout generation and tracking
+- Data Source management with custom field mapping
+- Configurable parsing (header row, data start row per source)
+- Staging area for all uploaded data (review before approval)
+- Side-by-side conflict resolution with full record context
+- Approved data repository
+- Table linking via primary key fields
+- Easy deletion of bad/wrong uploads
 
 ### What's Been Implemented (January 14, 2026)
-- [x] User authentication (register, login, logout)
-- [x] Dashboard with stats overview (carriers, agents, uploads, conflicts, payouts)
-- [x] Carrier CRUD with field mapping configuration
-- [x] **Carrier-specific parsing config** (header_row, data_start_row per carrier)
-- [x] AI-powered field mapping suggestions (Gemini integration)
-- [x] Agent CRUD with commission rates
-- [x] Document upload center (Excel, PDF, CSV support)
-- [x] **Smart Excel header detection** (auto-detects header rows)
-- [x] **File structure preview API** for configuration
-- [x] AI data extraction from uploaded documents
-- [x] Data review page with validation/rejection
-- [x] Conflict detection and resolution UI
-- [x] Payout generation from validated records
-- [x] Payout tracking and completion marking
-- [x] Professional Swiss/High-Contrast UI design
 
-### Tested Carriers
-- **Foremost Signature**: Excel format, header row 4, 423+ records extracted successfully
-- **GEICO**: Complex multi-LOB structure (requires custom parsing)
-- **Foremost Specialty**: PDF agency scorecard format
+#### Data Flow
+1. **Data Sources** - Configure carriers with field mappings
+2. **Upload** - Import files (staged automatically)
+3. **Staging Area** - Review all data before approval
+4. **Conflict Resolution** - Side-by-side comparison with context
+5. **Approved Data** - Clean, validated records
+6. **Table Linking** - Combine sources by primary key
+
+#### Features
+- [x] Rev-Box branding and professional dark UI
+- [x] Data Sources management (CRUD)
+- [x] File structure preview for Excel files
+- [x] Auto-detect header rows in Excel
+- [x] Configurable header_row and data_start_row per source
+- [x] Field mapping with standard field library
+- [x] Primary key field designation
+- [x] Staging area with all uploads
+- [x] Bulk select/approve/reject records
+- [x] Easy upload deletion
+- [x] Side-by-side conflict comparison
+- [x] Full record context in conflict view
+- [x] Manual value entry for conflicts
+- [x] Approved data export to CSV
+- [x] Table linking by common fields
+- [x] Link preview with merged data
 
 ### Technical Stack
-- **Frontend**: React 19, Tailwind CSS, Shadcn UI, React Router
-- **Backend**: FastAPI, Motor (async MongoDB driver)
+- **Frontend**: React 19, Tailwind CSS, Shadcn UI
+- **Backend**: FastAPI, Motor (async MongoDB)
 - **Database**: MongoDB
-- **AI Integration**: Emergent LLM Key with Gemini 2.5 Flash for document extraction
+- **AI**: Emergent LLM Key (Gemini 2.5 Flash) for PDF extraction
 
 ### API Endpoints
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-- `GET /api/auth/me` - Get current user
-- `GET/POST/PUT/DELETE /api/carriers` - Carrier management
-- `PUT /api/carriers/{id}/field-mappings` - Update field mappings
-- `POST /api/carriers/{id}/suggest-mappings` - AI mapping suggestions
-- `GET/POST/PUT/DELETE /api/agents` - Agent management
-- `POST /api/uploads` - Upload carrier reports
-- `POST /api/uploads/preview` - Preview Excel file structure
-- `GET /api/uploads` - List uploads
-- `GET /api/records` - List extracted records
-- `PUT /api/records/{id}/validate` - Validate record
-- `PUT /api/records/{id}/reject` - Reject record
+- `GET/POST/PUT/DELETE /api/carriers` - Data source management
+- `PUT /api/carriers/{id}/field-mappings` - Field mapping config
+- `POST /api/uploads/preview` - Preview Excel structure
+- `POST /api/uploads` - Upload files to staging
+- `GET /api/uploads/{id}/records` - Records for an upload
+- `GET /api/records` - List records with filters
+- `PUT /api/records/{id}/validate` - Approve record
+- `PUT /api/records/{id}/reject` - Reject/delete record
 - `GET /api/conflicts` - List conflicts
 - `PUT /api/conflicts/{id}/resolve` - Resolve conflict
-- `POST /api/payouts/generate` - Generate payouts
-- `GET /api/payouts` - List payouts
-- `PUT /api/payouts/{id}/complete` - Mark payout complete
-- `GET /api/dashboard` - Dashboard stats
+- `GET /api/dashboard` - Stats overview
+
+### Tested Data Sources
+- **Foremost Signature**: Excel, header row 4, 423+ records
+- **GEICO**: Complex multi-LOB structure (needs custom parsing)
+- **Foremost Specialty**: PDF scorecard format
 
 ### Prioritized Backlog
 
-#### P0 (Critical - Next Phase)
-- [ ] GEICO multi-LOB Excel parser (complex structure)
-- [ ] Foremost Specialty PDF parser optimization
-- [ ] Batch processing queue for large files
-- [ ] Email notifications for conflicts
+#### P0 (Critical)
+- [ ] Improve session timeout handling
+- [ ] Add search/filter to Staging Area records
+- [ ] Batch conflict resolution
 
 #### P1 (Important)
-- [ ] Agent self-service portal
-- [ ] Automated reconciliation reports
-- [ ] Audit trail for all actions
-- [ ] Export data to CSV/Excel
+- [ ] Save linked table results
+- [ ] Custom field creation
+- [ ] Audit trail for approvals/rejections
+- [ ] User roles and permissions
 
 #### P2 (Nice to Have)
-- [ ] Multi-tenant support
-- [ ] Custom report builder
-- [ ] API for carrier integrations
-- [ ] Mobile responsive improvements
+- [ ] API import from carriers
+- [ ] Scheduled imports
+- [ ] Dashboard analytics/charts
 
 ### Next Tasks
-1. Configure GEICO carrier with proper field mappings
-2. Test PDF extraction with Foremost Specialty file
-3. Implement batch validation/rejection
-4. Add search and advanced filtering to records
-5. Add date range filters to payouts
+1. Add search to Staging Area
+2. Test GEICO file parsing
+3. Add batch conflict resolution ("resolve all same way")
+4. Implement linked data export
