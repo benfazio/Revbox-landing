@@ -192,11 +192,14 @@ export default function CarriersPage() {
 
       {/* Add/Edit Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md" aria-describedby="carrier-dialog-desc">
           <DialogHeader>
             <DialogTitle className="font-heading">
               {editingCarrier ? 'Edit Carrier' : 'Add New Carrier'}
             </DialogTitle>
+            <p id="carrier-dialog-desc" className="sr-only">
+              {editingCarrier ? 'Edit carrier details' : 'Create a new insurance carrier'}
+            </p>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">

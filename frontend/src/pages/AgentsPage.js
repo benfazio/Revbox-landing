@@ -190,11 +190,14 @@ export default function AgentsPage() {
 
       {/* Add/Edit Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md" aria-describedby="agent-dialog-desc">
           <DialogHeader>
             <DialogTitle className="font-heading">
               {editingAgent ? 'Edit Agent' : 'Add New Agent'}
             </DialogTitle>
+            <p id="agent-dialog-desc" className="sr-only">
+              {editingAgent ? 'Edit agent details' : 'Create a new agent record'}
+            </p>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
