@@ -19,7 +19,7 @@ Build a CRM-like system for a P&C (Property & Casualty) insurance aggregator com
 - Secure JWT authentication
 - Carrier management with custom field mapping per carrier
 - Agent/Payee management with commission tracking
-- Document upload (PDF, Excel) with AI-powered extraction
+- Document upload (PDF, Excel, CSV) with AI-powered extraction
 - Conflict detection (duplicates, field mismatches)
 - Data review and validation workflow
 - Payout generation and tracking
@@ -28,15 +28,23 @@ Build a CRM-like system for a P&C (Property & Casualty) insurance aggregator com
 - [x] User authentication (register, login, logout)
 - [x] Dashboard with stats overview (carriers, agents, uploads, conflicts, payouts)
 - [x] Carrier CRUD with field mapping configuration
+- [x] **Carrier-specific parsing config** (header_row, data_start_row per carrier)
 - [x] AI-powered field mapping suggestions (Gemini integration)
 - [x] Agent CRUD with commission rates
-- [x] Document upload center (Excel, PDF support)
+- [x] Document upload center (Excel, PDF, CSV support)
+- [x] **Smart Excel header detection** (auto-detects header rows)
+- [x] **File structure preview API** for configuration
 - [x] AI data extraction from uploaded documents
 - [x] Data review page with validation/rejection
 - [x] Conflict detection and resolution UI
 - [x] Payout generation from validated records
 - [x] Payout tracking and completion marking
 - [x] Professional Swiss/High-Contrast UI design
+
+### Tested Carriers
+- **Foremost Signature**: Excel format, header row 4, 423+ records extracted successfully
+- **GEICO**: Complex multi-LOB structure (requires custom parsing)
+- **Foremost Specialty**: PDF agency scorecard format
 
 ### Technical Stack
 - **Frontend**: React 19, Tailwind CSS, Shadcn UI, React Router
@@ -53,6 +61,7 @@ Build a CRM-like system for a P&C (Property & Casualty) insurance aggregator com
 - `POST /api/carriers/{id}/suggest-mappings` - AI mapping suggestions
 - `GET/POST/PUT/DELETE /api/agents` - Agent management
 - `POST /api/uploads` - Upload carrier reports
+- `POST /api/uploads/preview` - Preview Excel file structure
 - `GET /api/uploads` - List uploads
 - `GET /api/records` - List extracted records
 - `PUT /api/records/{id}/validate` - Validate record
@@ -67,8 +76,9 @@ Build a CRM-like system for a P&C (Property & Casualty) insurance aggregator com
 ### Prioritized Backlog
 
 #### P0 (Critical - Next Phase)
-- [ ] CSV file upload support
-- [ ] Bulk carrier report processing queue
+- [ ] GEICO multi-LOB Excel parser (complex structure)
+- [ ] Foremost Specialty PDF parser optimization
+- [ ] Batch processing queue for large files
 - [ ] Email notifications for conflicts
 
 #### P1 (Important)
@@ -84,8 +94,8 @@ Build a CRM-like system for a P&C (Property & Casualty) insurance aggregator com
 - [ ] Mobile responsive improvements
 
 ### Next Tasks
-1. Test PDF extraction with real insurance documents
-2. Add more standard field mappings for common carriers
+1. Configure GEICO carrier with proper field mappings
+2. Test PDF extraction with Foremost Specialty file
 3. Implement batch validation/rejection
 4. Add search and advanced filtering to records
 5. Add date range filters to payouts
