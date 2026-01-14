@@ -602,10 +602,20 @@ async def create_upload(
     try:
         extracted_data = []
         
+        # Get carrier parsing configuration
+        header_row = carrier.get("header_row")
+        data_start_row = carrier.get("data_start_row")
+        
         if file_ext in ['.xlsx', '.xls']:
-            extracted_data = await extract_excel_data(str(file_path))
+            extracted_data = await extract_excel_data(str(file_path), header_row=header_row, start_row=data_start_row)
         elif file_ext == '.pdf':
             extracted_data = await ai_extract_from_pdf(str(file_path), carrier.get("field_mappings", {}))
+        elif file_ext == '.csv':
+            # Handle CSV files
+            import csv
+            with open(file_path, 'r', encoding='utf-8-sig') as f:
+                reader = csv.DictReader(f)
+                extracted_data = list(reader)
         
         # Process each record
         conflict_count = 0
