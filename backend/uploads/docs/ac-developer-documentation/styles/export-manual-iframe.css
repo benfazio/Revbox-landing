@@ -1,0 +1,52 @@
+/*$Id$*/
+
+/* Webfont: LatoLatin-Regular */@font-face {
+    font-family: 'LatoLatin';
+    src: url('../fonts/LatoLatin-Regular.eot'); /* IE9 Compat Modes */
+    src: url('../fonts/LatoLatin-Regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+        url('../fonts/LatoLatin-Regular.woff2') format('woff2'), /* Modern Browsers */
+        url('../fonts/LatoLatin-Regular.woff') format('woff'), /* Modern Browsers */
+        url('../fonts/LatoLatin-Regular.ttf') format('truetype');
+    font-style: normal;
+    font-weight: normal;
+}
+
+/* Webfont: LatoLatin-Bold */@font-face {
+    font-family: 'LatoLatin';
+    src: url('../fonts/LatoLatin-Bold.eot'); /* IE9 Compat Modes */
+    src: url('../fonts/LatoLatin-Bold.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+        url('../fonts/LatoLatin-Bold.woff2') format('woff2'), /* Modern Browsers */
+        url('../fonts/LatoLatin-Bold.woff') format('woff'), /* Modern Browsers */
+        url('../fonts/LatoLatin-Bold.ttf') format('truetype');
+    font-style: normal;
+    font-weight: bold;
+}
+
+body{
+	font: 15px/1.5 LatoLatin,sans-serif,arial;	
+    max-width: 950px !important;
+    margin: 0 auto !important;
+    padding: 30px !important;
+}
+
+.zl-article-attachment{
+    list-style: none;
+    margin: 0;
+    padding: 0
+}
+.zl-article-attachment li {
+	display: inline-block;
+	margin-right: 10px;
+}
+.zl-article-attachment li a{
+	color:#000;
+	text-decoration: none;
+	border: 1px solid #ccc;
+	padding: 10px 15px;
+	border-radius: 3px;
+	display: inline-block;
+    margin-bottom: 10px;
+}
+.zl-article-attachment li a:hover{
+	background: #f2f2f2;
+}

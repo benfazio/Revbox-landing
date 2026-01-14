@@ -1,0 +1,56 @@
+<title>AC Developer Documentation</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="styles/export-manual.css">
+<div class="zl-mx-wrapper zl-flex zl-fl-column zl-fl-grow">
+ <header class="zl-mx-header">
+  <h3>AC Developer Documentation</h3>
+ </header>
+ <div id="zl-include-banner"></div>
+ <div class="zl-mx-container">
+  <nav class="zl-mx-nav zl-flex zl-fl-column">
+   <div class="zl-expand-collapse" id="zls-expandcollapseall" onclick="expandCollapseAll(this,false)">
+    Collapse all
+   </div>
+   <ul class="zl-ul-reset zl-fl-grow zl-overflow-auto" id="apendArticles">
+    <li><strong class="zl-expand" purpose="chapter" onclick="expandCollapse(this)">Overview</strong>
+     <ul class="zl-ul-reset" purpose="appendChapterArticles">
+      <li purpose="zl-article-li" class="zl-mx-active"><a href="#" onclick="loadFile(this, &quot;./templates/overview/module-schema.html&quot;)">Module Schema</a></li>
+     </ul></li>
+    <li><strong class="zl-expand" purpose="chapter" onclick="expandCollapse(this)">File Parser</strong>
+     <ul class="zl-ul-reset" purpose="appendChapterArticles">
+      <li purpose="zl-article-li" class=""><a href="#" onclick="loadFile(this, &quot;./templates/file-parser/excel-file-parsers.html&quot;)">Excel File Parsers</a></li>
+      <li purpose="zl-article-li" class=""><a href="#" onclick="loadFile(this, &quot;./templates/file-parser/pdf-file-parsers.html&quot;)">PDF File Parsers</a></li>
+      <li purpose="zl-article-li" class=""><a href="#" onclick="loadFile(this, &quot;./templates/file-parser/delete-related-records-function.html&quot;)">Delete Related Records Function</a></li>
+      <li purpose="zl-article-li" class=""><a href="#" onclick="loadFile(this, &quot;./templates/file-parser/relevant-schema.html&quot;)">Relevant Schema</a></li>
+      <li purpose="zl-article-li" class=""><a href="#" onclick="loadFile(this, &quot;./templates/file-parser/agency-update-related-records-function.html&quot;)">Agency Update Related Records Function</a></li>
+     </ul></li>
+    <li><strong class="zl-expand" purpose="chapter" onclick="expandCollapse(this)">Member Portal</strong>
+     <ul class="zl-ul-reset" purpose="appendChapterArticles">
+      <li purpose="zl-article-li" class=""><a href="#" onclick="loadFile(this, &quot;./templates/member-portal/member-analytics.html&quot;)">Member Analytics</a></li>
+      <li purpose="zl-article-li" class=""><a href="#" onclick="loadFile(this, &quot;./templates/member-portal/relevant-schema-1.html&quot;)">Relevant Schema</a></li>
+     </ul></li>
+    <li><strong class="zl-expand" purpose="chapter" onclick="expandCollapse(this)">Custom Widgets</strong>
+     <ul class="zl-ul-reset" purpose="appendChapterArticles">
+      <li purpose="zl-article-li" class=""><a href="#" onclick="loadFile(this, &quot;./templates/custom-widget/create-account.html&quot;)">Create Account</a></li>
+      <li purpose="zl-article-li" class=""><a href="#" onclick="loadFile(this, &quot;./templates/custom-widget/platform-report.html&quot;)">Platform Report</a></li>
+      <li purpose="zl-article-li" class=""><a href="#" onclick="loadFile(this, &quot;./templates/custom-widget/platform-report-relevant-schema.html&quot;)">Platform Report Relevant Schema</a></li>
+     </ul></li>
+    <li><strong class="zl-expand" purpose="chapter" onclick="expandCollapse(this)">Payout Parser</strong>
+     <ul class="zl-ul-reset" purpose="appendChapterArticles">
+      <li purpose="zl-article-li" class=""><a href="#" onclick="loadFile(this, &quot;./templates/payout-parser/relevant-schema-2.html&quot;)">Relevant Schema</a></li>
+      <li purpose="zl-article-li" class=""><a href="#" onclick="loadFile(this, &quot;./templates/payout-parser/csv-parser.html&quot;)">CSV Parser</a></li>
+     </ul></li>
+    <li><strong class="zl-expand" purpose="chapter" onclick="expandCollapse(this)">Other</strong>
+     <ul class="zl-ul-reset" purpose="appendChapterArticles">
+      <li purpose="zl-article-li" class=""><a href="#" onclick="loadFile(this, &quot;./templates/other/customized-home-pages.html&quot;)">Customized Home Pages</a></li>
+      <li purpose="zl-article-li" class=""><a href="#" onclick="loadFile(this, &quot;./templates/other/setting-up-dashboards.html&quot;)">Setting up Dashboards</a></li>
+     </ul></li>
+   </ul>
+  </nav>
+  <article class="zl-fl-grow zl-overflow-auto zl-flex">
+   <iframe class="zl-content-container" id="contentLoad" src="./templates/overview/module-schema.html"></iframe>
+  </article>
+ </div>
+</div>
+<script>		function loadFile(ele, filePath) { document.getElementById( "contentLoad" ).src = filePath; document.getElementsByClassName("zl-mx-active")[0].classList.remove("zl-mx-active"); ele.parentElement.classList.add("zl-mx-active");}		function expandCollapse(ele){var element = ele.parentElement.querySelector("[purpose=appendChapterArticles]"); var classList = element.classList; var isExpand=classList.contains('zl-hide'); if(isExpand) { ele.classList.remove("zl-collapse"); ele.classList.add("zl-expand"); element.classList.remove('zl-hide'); } else { ele.classList.remove("zl-expand"); ele.classList.add("zl-collapse"); element.classList.add('zl-hide'); } if(document.getElementById("apendArticles").getElementsByClassName(isExpand?"zl-collapse":"zl-expand").length == 0) { var expandCollapseAllEle = document.getElementById("zls-expandcollapseall"); expandCollapseAllEle.textContent=isExpand? "Collapse all" : "Expand all"; expandCollapseAllEle.setAttribute("onclick", "expandCollapseAll(this,"+ !isExpand +")"); }}		function expandCollapseAll(ele, isExpand){ele.textContent=isExpand? "Collapse all" : "Expand all"; ele.setAttribute("onclick", "expandCollapseAll(this,"+ !isExpand +")"); var elements = document.querySelectorAll("[purpose=appendChapterArticles]"); elements.forEach(function(element, index){ var chapterElement = element.parentElement.querySelector("[purpose=chapter]"); if(isExpand) {chapterElement.classList.remove("zl-collapse"); chapterElement.classList.add("zl-expand"); element.classList.remove('zl-hide'); } else { chapterElement.classList.remove("zl-expand"); chapterElement.classList.add("zl-collapse"); element.classList.add('zl-hide'); } });}	</script>
