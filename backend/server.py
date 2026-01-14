@@ -646,6 +646,7 @@ async def create_upload(
                         "id": str(uuid.uuid4()),
                         "record_id": record_doc["id"],
                         "upload_id": upload_id,
+                        "existing_record_id": conflict.get("existing_record_id"),
                         "conflict_type": conflict["type"],
                         "field_name": conflict.get("field", ""),
                         "current_value": conflict.get("existing_value"),
