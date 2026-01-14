@@ -72,10 +72,11 @@ class CarrierCreate(BaseModel):
     description: Optional[str] = ""
     primary_key_fields: List[str] = []
     field_mappings: Dict[str, str] = {}
+    custom_fields: List[str] = []  # User-defined custom fields
     # Parsing configuration
-    header_row: Optional[int] = None  # Row number for headers (1-indexed), auto-detect if None
-    data_start_row: Optional[int] = None  # Row number for data start, auto-detect if None
-    file_type: Optional[str] = "auto"  # "excel", "pdf", "auto"
+    header_row: Optional[int] = None
+    data_start_row: Optional[int] = None
+    file_type: Optional[str] = "auto"
 
 class CarrierResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -85,6 +86,7 @@ class CarrierResponse(BaseModel):
     description: str
     primary_key_fields: List[str]
     field_mappings: Dict[str, str]
+    custom_fields: List[str] = []
     header_row: Optional[int] = None
     data_start_row: Optional[int] = None
     file_type: Optional[str] = "auto"
