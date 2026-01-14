@@ -79,19 +79,15 @@ export default function StagingPage() {
   const handleDeleteUpload = async (uploadId) => {
     if (!window.confirm('Delete this upload and all its records? This cannot be undone.')) return;
     try {
-      // Delete all records for this upload
-      const records = await axios.get(`${API}/uploads/${uploadId}/records`);
-      for (const record of records.data) {
-        await axios.put(`${API}/records/${record.id}/reject`);
-      }
-      toast.success('Upload deleted');
+      await axios.delete(`${API}/uploads/${uploadId}`);
+      toast.success('Upload deleted successfully');
       fetchData();
       if (selectedUpload === uploadId) {
         setSelectedUpload(null);
         setRecords([]);
       }
     } catch (error) {
-      toast.error('Failed to delete upload');
+      toast.error(error.response?.data?.detail || 'Failed to delete upload');
     }
   };
 
