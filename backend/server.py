@@ -695,6 +695,35 @@ async def get_upload(upload_id: str, current_user: dict = Depends(get_current_us
         raise HTTPException(status_code=404, detail="Upload not found")
     return UploadResponse(**upload)
 
+@api_router.delete("/uploads/{upload_id}")
+async def delete_upload(upload_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete an upload and all its associated records and conflicts"""
+    upload = await db.uploads.find_one({"id": upload_id})
+    if not upload:
+        raise HTTPException(status_code=404, detail="Upload not found")
+    
+    # Delete all conflicts for records in this upload
+    await db.conflicts.delete_many({"upload_id": upload_id})
+    
+    # Delete all records for this upload
+    deleted_records = await db.extracted_records.delete_many({"upload_id": upload_id})
+    
+    # Delete the upload itself
+    await db.uploads.delete_one({"id": upload_id})
+    
+    # Delete the file if it exists
+    file_path = Path(upload.get("file_path", ""))
+    if file_path.exists():
+        try:
+            file_path.unlink()
+        except:
+            pass
+    
+    return {
+        "message": "Upload deleted successfully",
+        "deleted_records": deleted_records.deleted_count
+    }
+
 @api_router.get("/uploads/{upload_id}/records", response_model=List[ExtractedRecordResponse])
 async def get_upload_records(upload_id: str, current_user: dict = Depends(get_current_user)):
     records = await db.extracted_records.find({"upload_id": upload_id}, {"_id": 0}).to_list(10000)
