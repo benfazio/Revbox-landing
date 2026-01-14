@@ -13,7 +13,8 @@ import {
   ChevronRight,
   FileSpreadsheet,
   Info,
-  ArrowRight
+  ArrowRight,
+  Rows
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -84,6 +85,22 @@ export default function ConflictResolutionPage() {
 
   const currentConflict = conflicts[currentIndex];
 
+  // Get all fields from both records for comparison
+  const getAllFields = () => {
+    const fields = new Set();
+    if (conflictDetails?.existing_record?.mapped_data) {
+      Object.keys(conflictDetails.existing_record.mapped_data).forEach(k => {
+        if (!k.startsWith('_')) fields.add(k);
+      });
+    }
+    if (conflictDetails?.new_record?.mapped_data) {
+      Object.keys(conflictDetails.new_record.mapped_data).forEach(k => {
+        if (!k.startsWith('_')) fields.add(k);
+      });
+    }
+    return Array.from(fields);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -98,7 +115,7 @@ export default function ConflictResolutionPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-slate-900">Conflict Resolution</h1>
-            <p className="text-sm text-slate-500 mt-1">Review conflicts with full context and source information</p>
+            <p className="text-sm text-slate-500 mt-1">Compare full data segments side by side</p>
           </div>
           {conflicts.length > 0 && (
             <Badge variant="outline" className="status-conflict text-sm px-3 py-1">
@@ -137,7 +154,7 @@ export default function ConflictResolutionPage() {
 
             {currentConflict && (
               <div className="space-y-4">
-                {/* WHY Section - Conflict Explanation */}
+                {/* WHY Section */}
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-5">
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -148,8 +165,8 @@ export default function ConflictResolutionPage() {
                       <p className="text-sm text-amber-800">
                         {conflictDetails?.reason || 
                           (currentConflict.conflict_type === 'mismatch' 
-                            ? `The field "${currentConflict.field_name}" has different values. A record with matching primary key already exists, but the "${currentConflict.field_name}" value differs.`
-                            : 'A record with the same primary key values was found. This could be a duplicate or an updated version of existing data.'
+                            ? `The field "${currentConflict.field_name}" has different values between the existing record and the new upload. Records are matched by their primary key fields.`
+                            : 'A record with matching primary key values already exists in the system.'
                           )}
                       </p>
                     </div>
@@ -159,130 +176,108 @@ export default function ConflictResolutionPage() {
                 {/* Source Information */}
                 {conflictDetails && (
                   <div className="grid grid-cols-2 gap-4">
-                    {/* Existing Data Source */}
                     <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                      <div className="flex items-center gap-2 mb-3">
+                      <div className="flex items-center gap-2 mb-2">
                         <FileSpreadsheet className="w-4 h-4 text-slate-500" />
-                        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                          Existing Data From
-                        </span>
+                        <span className="text-xs font-semibold text-slate-500 uppercase">Existing Data Source</span>
                       </div>
                       {conflictDetails.existing_upload ? (
-                        <div>
+                        <>
                           <p className="font-medium text-slate-900">{conflictDetails.existing_upload.filename}</p>
                           <p className="text-sm text-slate-500">{conflictDetails.existing_upload.carrier_name}</p>
                           <p className="text-xs text-slate-400 mt-1">
-                            Uploaded: {new Date(conflictDetails.existing_upload.created_at).toLocaleDateString()}
+                            {new Date(conflictDetails.existing_upload.created_at).toLocaleDateString()}
                           </p>
-                        </div>
+                        </>
                       ) : (
-                        <p className="text-sm text-slate-500">Source information not available</p>
+                        <p className="text-sm text-slate-500">Source info not available</p>
                       )}
                     </div>
 
-                    {/* New Data Source */}
                     <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                      <div className="flex items-center gap-2 mb-3">
+                      <div className="flex items-center gap-2 mb-2">
                         <FileSpreadsheet className="w-4 h-4 text-blue-500" />
-                        <span className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
-                          New Data From
-                        </span>
+                        <span className="text-xs font-semibold text-blue-600 uppercase">New Data Source</span>
                       </div>
                       {conflictDetails.new_upload ? (
-                        <div>
+                        <>
                           <p className="font-medium text-blue-900">{conflictDetails.new_upload.filename}</p>
                           <p className="text-sm text-blue-700">{conflictDetails.new_upload.carrier_name}</p>
                           <p className="text-xs text-blue-500 mt-1">
-                            Uploaded: {new Date(conflictDetails.new_upload.created_at).toLocaleDateString()}
+                            {new Date(conflictDetails.new_upload.created_at).toLocaleDateString()}
                           </p>
-                        </div>
+                        </>
                       ) : (
-                        <p className="text-sm text-blue-500">Source information not available</p>
+                        <p className="text-sm text-blue-500">Source info not available</p>
                       )}
                     </div>
                   </div>
                 )}
 
-                {/* Side by Side Value Comparison */}
+                {/* FULL DATA SEGMENT COMPARISON */}
                 <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-                  <div className="px-6 py-4 bg-red-50 border-b border-red-200 flex items-center gap-3">
-                    <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                      <AlertTriangle className="w-5 h-5 text-red-600" />
+                  <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center gap-3">
+                    <div className="w-10 h-10 bg-slate-200 rounded-lg flex items-center justify-center">
+                      <Rows className="w-5 h-5 text-slate-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-slate-900">
-                        {currentConflict.conflict_type === 'mismatch' ? 'Value Mismatch' : 'Duplicate Record'}
-                      </h3>
-                      <p className="text-sm text-slate-600">
-                        Field: <span className="font-mono font-medium bg-red-100 px-2 py-0.5 rounded">{currentConflict.field_name || 'N/A'}</span>
-                      </p>
+                      <h3 className="font-semibold text-slate-900">Full Data Segment Comparison</h3>
+                      <p className="text-sm text-slate-500">Compare all fields between both records</p>
                     </div>
                   </div>
 
-                  {currentConflict.conflict_type === 'mismatch' && (
-                    <div className="grid grid-cols-2 divide-x divide-slate-200">
-                      {/* Existing Value */}
-                      <div className="p-6">
-                        <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">
-                          Current Value (Keep?)
-                        </div>
-                        <div className="bg-slate-100 rounded-xl p-6 border-2 border-slate-300">
-                          <div className="text-2xl font-mono font-bold text-slate-900 break-all">
-                            {currentConflict.current_value !== null 
-                              ? String(currentConflict.current_value) 
-                              : <span className="text-slate-400 italic text-lg">empty</span>}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Arrow */}
-                      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 hidden">
-                        <div className="w-10 h-10 bg-white rounded-full border-2 border-slate-200 flex items-center justify-center">
-                          <ArrowRight className="w-5 h-5 text-slate-400" />
-                        </div>
-                      </div>
-
-                      {/* New Value */}
-                      <div className="p-6 bg-blue-50/50">
-                        <div className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-4">
-                          New Value (Accept?)
-                        </div>
-                        <div className="bg-blue-100 rounded-xl p-6 border-2 border-blue-400">
-                          <div className="text-2xl font-mono font-bold text-blue-900 break-all">
-                            {currentConflict.new_value !== null 
-                              ? String(currentConflict.new_value) 
-                              : <span className="text-blue-400 italic text-lg">empty</span>}
-                          </div>
-                        </div>
-                      </div>
+                  {detailsLoading ? (
+                    <div className="p-12 text-center">
+                      <div className="spinner mx-auto" />
                     </div>
-                  )}
-
-                  {/* Full Record Context */}
-                  {conflictDetails?.new_record && (
-                    <div className="px-6 py-4 border-t border-slate-200 bg-slate-50">
-                      <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
-                        Full Record Context (New Upload)
-                      </div>
-                      <div className="grid grid-cols-4 gap-3">
-                        {Object.entries(conflictDetails.new_record.mapped_data || {})
-                          .filter(([key]) => !key.startsWith('_'))
-                          .slice(0, 8)
-                          .map(([key, value]) => {
-                            const isConflictField = key === currentConflict.field_name;
+                  ) : (
+                    <div className="overflow-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="bg-slate-100">
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider w-1/4 border-r border-slate-200">
+                              Field
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider w-5/12 border-r border-slate-200 bg-slate-50">
+                              Existing Value
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-blue-600 uppercase tracking-wider w-5/12 bg-blue-50">
+                              New Value
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {getAllFields().map((field) => {
+                            const existingVal = conflictDetails?.existing_record?.mapped_data?.[field];
+                            const newVal = conflictDetails?.new_record?.mapped_data?.[field];
+                            const isConflictField = field === currentConflict.field_name;
+                            const isDifferent = String(existingVal || '') !== String(newVal || '');
+                            
                             return (
-                              <div 
-                                key={key} 
-                                className={`p-2 rounded ${isConflictField ? 'bg-red-100 border-2 border-red-400' : 'bg-white border border-slate-200'}`}
+                              <tr 
+                                key={field} 
+                                className={isConflictField ? 'bg-red-50' : isDifferent ? 'bg-amber-50/50' : ''}
                               >
-                                <span className={`text-xs ${isConflictField ? 'text-red-600 font-semibold' : 'text-slate-500'}`}>{key}</span>
-                                <p className={`font-mono text-sm truncate ${isConflictField ? 'text-red-700 font-bold' : 'text-slate-900'}`}>
-                                  {value !== null ? String(value) : '-'}
-                                </p>
-                              </div>
+                                <td className={`px-4 py-3 text-sm border-r border-slate-200 ${isConflictField ? 'font-bold text-red-700' : 'text-slate-600'}`}>
+                                  {field}
+                                  {isConflictField && (
+                                    <Badge variant="outline" className="ml-2 status-conflict text-xs">CONFLICT</Badge>
+                                  )}
+                                </td>
+                                <td className={`px-4 py-3 font-mono text-sm border-r border-slate-200 ${isConflictField ? 'bg-red-100 text-red-900 font-bold' : 'text-slate-900'}`}>
+                                  {existingVal !== null && existingVal !== undefined ? String(existingVal) : <span className="text-slate-400 italic">empty</span>}
+                                </td>
+                                <td className={`px-4 py-3 font-mono text-sm ${isConflictField ? 'bg-blue-100 text-blue-900 font-bold' : 'bg-blue-50/30 text-slate-900'}`}>
+                                  {newVal !== null && newVal !== undefined ? String(newVal) : <span className="text-slate-400 italic">empty</span>}
+                                  {isDifferent && !isConflictField && (
+                                    <span className="ml-2 text-amber-600 text-xs">← different</span>
+                                  )}
+                                </td>
+                              </tr>
                             );
                           })}
-                      </div>
+                        </tbody>
+                      </table>
                     </div>
                   )}
 
@@ -290,14 +285,18 @@ export default function ConflictResolutionPage() {
                   <div className="px-6 py-4 border-t border-slate-200 bg-white">
                     {showManualInput ? (
                       <div className="flex items-center gap-3">
-                        <Input
-                          value={manualValue}
-                          onChange={(e) => setManualValue(e.target.value)}
-                          placeholder="Enter the correct value..."
-                          className="flex-1 font-mono"
-                          autoFocus
-                          data-testid="manual-value-input"
-                        />
+                        <div className="flex-1">
+                          <label className="text-xs text-slate-500 mb-1 block">
+                            Enter correct value for: <span className="font-mono font-semibold">{currentConflict.field_name}</span>
+                          </label>
+                          <Input
+                            value={manualValue}
+                            onChange={(e) => setManualValue(e.target.value)}
+                            placeholder="Enter correct value..."
+                            className="font-mono"
+                            autoFocus
+                          />
+                        </div>
                         <Button
                           onClick={() => handleResolve(currentConflict.id, 'manual', manualValue)}
                           className="btn-primary"
@@ -319,24 +318,21 @@ export default function ConflictResolutionPage() {
                             variant="outline"
                             onClick={() => handleResolve(currentConflict.id, 'keep_current')}
                             className="border-slate-300"
-                            data-testid="keep-current-btn"
                           >
                             <X className="w-4 h-4 mr-2 text-slate-500" />
-                            Keep Current Value
+                            Keep Existing
                           </Button>
                           <Button
                             onClick={() => handleResolve(currentConflict.id, 'accept_new')}
                             className="bg-blue-600 hover:bg-blue-700 text-white"
-                            data-testid="accept-new-btn"
                           >
                             <Check className="w-4 h-4 mr-2" />
-                            Accept New Value
+                            Accept New
                           </Button>
                         </div>
                         <Button
                           variant="outline"
                           onClick={() => setShowManualInput(true)}
-                          data-testid="manual-entry-btn"
                         >
                           <Edit2 className="w-4 h-4 mr-2" />
                           Enter Different Value
@@ -351,7 +347,7 @@ export default function ConflictResolutionPage() {
                   <div className="px-4 py-3 border-b border-slate-200">
                     <h3 className="font-semibold text-slate-900 text-sm">All Pending Conflicts</h3>
                   </div>
-                  <div className="divide-y divide-slate-100 max-h-48 overflow-auto">
+                  <div className="divide-y divide-slate-100 max-h-40 overflow-auto">
                     {conflicts.map((conflict, idx) => (
                       <div
                         key={conflict.id}
@@ -365,9 +361,6 @@ export default function ConflictResolutionPage() {
                             {conflict.conflict_type}
                           </Badge>
                           <span className="font-mono text-sm text-slate-600">{conflict.field_name || 'record'}</span>
-                        </div>
-                        <div className="text-xs text-slate-400">
-                          {idx === currentIndex ? 'Current' : ''}
                         </div>
                       </div>
                     ))}
