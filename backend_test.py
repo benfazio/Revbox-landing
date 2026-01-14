@@ -6,15 +6,19 @@ import json
 import uuid
 from datetime import datetime
 import os
+from pathlib import Path
 
-class InsuranceCRMTester:
-    def __init__(self, base_url="https://insurance-crm-hub.preview.emergentagent.com/api"):
+class RevBoxAPITester:
+    def __init__(self, base_url="https://insurance-crm-hub.preview.emergentagent.com"):
         self.base_url = base_url
         self.token = None
-        self.user_id = None
         self.tests_run = 0
         self.tests_passed = 0
-        self.test_results = []
+        self.created_resources = {
+            'carriers': [],
+            'uploads': [],
+            'agents': []
+        }
 
     def log_test(self, name, success, details=""):
         """Log test result"""
