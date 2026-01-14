@@ -1,0 +1,103 @@
+{
+  "timestamp": "2026-01-14T18:31:02.334881",
+  "total_tests": 19,
+  "passed_tests": 19,
+  "success_rate": 100.0,
+  "test_details": [
+    {
+      "test": "User Registration",
+      "success": true,
+      "details": "Status: 200"
+    },
+    {
+      "test": "User Login",
+      "success": true,
+      "details": "Status: 200"
+    },
+    {
+      "test": "Get Current User",
+      "success": true,
+      "details": "Status: 200"
+    },
+    {
+      "test": "Get Dashboard Stats",
+      "success": true,
+      "details": "Status: 200"
+    },
+    {
+      "test": "Create Carrier",
+      "success": true,
+      "details": "Status: 200"
+    },
+    {
+      "test": "Get All Carriers",
+      "success": true,
+      "details": "Status: 200"
+    },
+    {
+      "test": "Get Carrier by ID",
+      "success": true,
+      "details": "Status: 200"
+    },
+    {
+      "test": "Update Carrier",
+      "success": true,
+      "details": "Status: 200"
+    },
+    {
+      "test": "Update Field Mappings",
+      "success": true,
+      "details": "Status: 200"
+    },
+    {
+      "test": "Delete Carrier",
+      "success": true,
+      "details": "Status: 200"
+    },
+    {
+      "test": "Create Agent",
+      "success": true,
+      "details": "Status: 200"
+    },
+    {
+      "test": "Get All Agents",
+      "success": true,
+      "details": "Status: 200"
+    },
+    {
+      "test": "Get Agent by ID",
+      "success": true,
+      "details": "Status: 200"
+    },
+    {
+      "test": "Update Agent",
+      "success": true,
+      "details": "Status: 200"
+    },
+    {
+      "test": "Delete Agent",
+      "success": true,
+      "details": "Status: 200"
+    },
+    {
+      "test": "Get All Uploads",
+      "success": true,
+      "details": "Status: 200"
+    },
+    {
+      "test": "Get All Records",
+      "success": true,
+      "details": "Status: 200"
+    },
+    {
+      "test": "Get All Conflicts",
+      "success": true,
+      "details": "Status: 200"
+    },
+    {
+      "test": "Get All Payouts",
+      "success": true,
+      "details": "Status: 200"
+    }
+  ]
+}
